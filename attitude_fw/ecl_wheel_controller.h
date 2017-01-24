@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2013-2016 Estimation and Control Library (ECL). All rights reserved.
+ *   Copyright (c) 2013-2017 Estimation and Control Library (ECL). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,7 +39,7 @@
  * @author Thomas Gubler <thomasgubler@gmail.com>
  * @author Andreas Antener <andreas@uaventure.com>
  *
- * Acknowledgements:
+ * Acknowledgments:
  *
  *   The control design is based on a design
  *   by Paul Riseborough and Andrew Tridgell, 2013,
@@ -55,16 +55,16 @@
 #include "ecl_controller.h"
 
 class __EXPORT ECL_WheelController :
-    public ECL_Controller
+	public ECL_Controller
 {
 public:
-    ECL_WheelController();
+	ECL_WheelController();
 
-    ~ECL_WheelController();
+	~ECL_WheelController();
 
-    float control_attitude(const struct ECL_ControlData &ctl_data);
+	float control_attitude(const struct ECL_ControlData &ctl_data);
 
-    float control_bodyrate(const struct ECL_ControlData &ctl_data);
+	float control_bodyrate(const struct ECL_ControlData &ctl_data);
 };
 
 #endif // ECL_HEADING_CONTROLLER_H

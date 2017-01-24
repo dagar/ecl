@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2013 Estimation and Control Library (ECL). All rights reserved.
+ *   Copyright (c) 2013-2017 Estimation and Control Library (ECL). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,7 +38,7 @@
  * @author Lorenz Meier <lm@inf.ethz.ch>
  * @author Thomas Gubler <thomasgubler@gmail.com>
  *
- * Acknowledgements:
+ * Acknowledgments:
  *
  *   The control design is based on a design
  *   by Paul Riseborough and Andrew Tridgell, 2013,
@@ -123,13 +123,17 @@ float ECL_Controller::get_desired_bodyrate()
 	return _bodyrate_setpoint;
 }
 
-float ECL_Controller::constrain_airspeed(float airspeed, float minspeed, float maxspeed) {
+float ECL_Controller::constrain_airspeed(float airspeed, float minspeed, float maxspeed)
+{
 	float airspeed_result = airspeed;
+
 	if (!PX4_ISFINITE(airspeed)) {
 		/* airspeed is NaN, +- INF or not available, pick center of band */
 		airspeed_result = 0.5f * (minspeed + maxspeed);
+
 	} else if (airspeed < minspeed) {
 		airspeed_result = minspeed;
 	}
+
 	return airspeed_result;
 }

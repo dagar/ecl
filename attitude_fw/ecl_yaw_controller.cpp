@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2013-2016 Estimation and Control Library (ECL). All rights reserved.
+ *   Copyright (c) 2013-2017 Estimation and Control Library (ECL). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,7 +35,7 @@
  * @file ecl_yaw_controller.cpp
  * Implementation of a simple orthogonal coordinated turn yaw PID controller.
  *
- * Authors and acknowledgements in header.
+ * Authors and acknowledgments in header.
  */
 
 #include "ecl_yaw_controller.h"
