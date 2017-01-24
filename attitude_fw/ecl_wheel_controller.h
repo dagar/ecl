@@ -46,25 +46,20 @@
  *   which in turn is based on initial work of
  *   Jonathan Challinger, 2012.
  */
-#ifndef ECL_HEADING_CONTROLLER_H
-#define ECL_HEADING_CONTROLLER_H
 
-#include <stdbool.h>
-#include <stdint.h>
+#ifndef ECL_WHEEL_CONTROLLER_H
+#define ECL_WHEEL_CONTROLLER_H
 
 #include "ecl_controller.h"
 
-class __EXPORT ECL_WheelController :
-	public ECL_Controller
+class __EXPORT ECL_WheelController : public ECL_Controller
 {
 public:
 	ECL_WheelController();
-
 	~ECL_WheelController();
 
-	float control_attitude(const struct ECL_ControlData &ctl_data);
-
-	float control_bodyrate(const struct ECL_ControlData &ctl_data);
+	float control_attitude(const struct ECL_ControlData &ctl_data) override;
+	float control_bodyrate(const struct ECL_ControlData &ctl_data) override;
 };
 
-#endif // ECL_HEADING_CONTROLLER_H
+#endif // ECL_WHEEL_CONTROLLER_H

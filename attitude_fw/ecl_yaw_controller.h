@@ -48,22 +48,16 @@
 #ifndef ECL_YAW_CONTROLLER_H
 #define ECL_YAW_CONTROLLER_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "ecl_controller.h"
 
-class __EXPORT ECL_YawController :
-	public ECL_Controller
+class __EXPORT ECL_YawController : public ECL_Controller
 {
 public:
 	ECL_YawController();
-
 	~ECL_YawController();
 
-	float control_attitude(const struct ECL_ControlData &ctl_data);
-
-	float control_bodyrate(const struct ECL_ControlData &ctl_data);
+	float control_attitude(const struct ECL_ControlData &ctl_data) override;
+	float control_bodyrate(const struct ECL_ControlData &ctl_data) override;
 
 	/* Additional setters */
 	void set_coordinated_min_speed(float coordinated_min_speed)
@@ -83,14 +77,11 @@ public:
 
 protected:
 	float _coordinated_min_speed;
-	float _max_rate;
-
 	int32_t _coordinated_method;
 
 	float control_bodyrate_impl(const struct ECL_ControlData &ctl_data);
 
 	float control_attitude_impl_openloop(const struct ECL_ControlData &ctl_data);
-
 	float control_attitude_impl_accclosedloop(const struct ECL_ControlData &ctl_data);
 
 };

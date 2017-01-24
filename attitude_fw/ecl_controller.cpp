@@ -48,6 +48,7 @@
 
 #include "ecl_controller.h"
 
+#include <ecl/ecl.h>
 #include <stdio.h>
 #include <mathlib/mathlib.h>
 
@@ -58,7 +59,8 @@ ECL_Controller::ECL_Controller(const char *name) :
 	_k_i(0.0f),
 	_k_ff(0.0f),
 	_integrator_max(0.0f),
-	_max_rate(0.0f),
+	_max_rate_pos(0.0f),
+	_max_rate_neg(0.0f),
 	_last_output(0.0f),
 	_integrator(0.0f),
 	_rate_error(0.0f),
@@ -105,7 +107,18 @@ void ECL_Controller::set_integrator_max(float max)
 
 void ECL_Controller::set_max_rate(float max_rate)
 {
-	_max_rate = max_rate;
+	_max_rate_pos = max_rate;
+	_max_rate_neg = max_rate;
+}
+
+void ECL_Controller::set_max_rate_pos(float max_rate_pos)
+{
+	_max_rate_pos = max_rate_pos;
+}
+
+void ECL_Controller::set_max_rate_neg(float max_rate_neg)
+{
+	_max_rate_neg = max_rate_neg;
 }
 
 float ECL_Controller::get_rate_error()
@@ -123,6 +136,23 @@ float ECL_Controller::get_desired_bodyrate()
 	return _bodyrate_setpoint;
 }
 
+void ECL_Controller::set_desired_bodyrate(float bodyrate)
+{
+	// limit the body angular rate
+	if (_max_rate_pos > 0.01f && _max_rate_neg > 0.01f) {
+
+		_bodyrate_setpoint = constrain(bodyrate, -_max_rate_neg, _max_rate_pos);
+	} else {
+		_bodyrate_setpoint = 0.0f;
+	}
+
+	if (!PX4_ISFINITE(_bodyrate_setpoint)) {
+		ECL_INFO("body rate setpoint not finite");
+		_bodyrate_setpoint = 0.0f;
+	}
+}
+
+
 float ECL_Controller::constrain_airspeed(float airspeed, float minspeed, float maxspeed)
 {
 	float airspeed_result = airspeed;
@@ -136,4 +166,37 @@ float ECL_Controller::constrain_airspeed(float airspeed, float minspeed, float m
 	}
 
 	return airspeed_result;
+}
+
+void ECL_Controller::update_integrator(bool lock)
+{
+	bool lock_integrator = lock;
+
+	// get the usual dt estimate
+	hrt_abstime dt_micros = ecl_elapsed_time(&_last_run);
+	_last_run = ecl_absolute_time();
+	float dt = (float)dt_micros * 1e-6f;
+
+	if (dt_micros > 500000) {
+		lock_integrator = true;
+	}
+
+	if (!lock_integrator && _k_i > 0.0f) {
+
+		float id = _rate_error * dt;
+
+		// anti-windup: do not allow integrator to increase if actuator is at limit
+		if (_last_output < -1.0f) {
+			// only allow motion to center: increase value
+			id = max(id, 0.0f);
+
+		} else if (_last_output > 1.0f) {
+			// only allow motion to center: decrease value
+			id = min(id, 0.0f);
+		}
+
+		_integrator += id * _k_i;
+
+		_integrator = constrain(_integrator, -_integrator_max, _integrator_max);
+	}
 }
