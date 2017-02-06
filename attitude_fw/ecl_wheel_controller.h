@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2013-2016 Estimation and Control Library (ECL). All rights reserved.
+ *   Copyright (c) 2013-2017 Estimation and Control Library (ECL). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,7 +33,7 @@
 
 /**
  * @file ecl_wheel_controller.h
- * Definition of a simple orthogonal coordinated turn yaw PID controller.
+ * Definition of a simple wheel PID controller.
  *
  * @author Lorenz Meier <lm@inf.ethz.ch>
  * @author Thomas Gubler <thomasgubler@gmail.com>
@@ -46,26 +46,20 @@
  *   which in turn is based on initial work of
  *   Jonathan Challinger, 2012.
  */
-#ifndef ECL_HEADING_CONTROLLER_H
-#define ECL_HEADING_CONTROLLER_H
-
-#include <stdbool.h>
-#include <stdint.h>
+#ifndef ECL_WHEEL_CONTROLLER_H
+#define ECL_WHEEL_CONTROLLER_H
 
 #include "ecl_controller.h"
 
-class __EXPORT ECL_WheelController :
-	public ECL_Controller
+class __EXPORT ECL_WheelController : public ECL_Controller
 {
 public:
-	ECL_WheelController();
+	ECL_WheelController() = default;
 	~ECL_WheelController() = default;
 
-	float control_attitude(const struct ECL_ControlData &ctl_data);
-
-	float control_bodyrate(const struct ECL_ControlData &ctl_data);
-
-	float control_euler_rate(const struct ECL_ControlData &ctl_data) {return 0;};
+	float control_attitude(const struct ECL_ControlData &ctl_data) override;
+	float control_euler_rate(const struct ECL_ControlData &ctl_data) override;
+	float control_bodyrate(const struct ECL_ControlData &ctl_data) override;
 };
 
-#endif // ECL_HEADING_CONTROLLER_H
+#endif // ECL_WHEEL_CONTROLLER_H

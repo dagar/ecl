@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2013-2016 Estimation and Control Library (ECL). All rights reserved.
+ *   Copyright (c) 2013-2017 Estimation and Control Library (ECL). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -48,31 +48,29 @@
 #ifndef ECL_YAW_CONTROLLER_H
 #define ECL_YAW_CONTROLLER_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "ecl_controller.h"
 
-class __EXPORT ECL_YawController :
-	public ECL_Controller
+class __EXPORT ECL_YawController : public ECL_Controller
 {
 public:
-	ECL_YawController();
+	ECL_YawController() = default;
 	~ECL_YawController() = default;
 
-	float control_attitude(const struct ECL_ControlData &ctl_data);
-	float control_euler_rate(const struct ECL_ControlData &ctl_data);
-	float control_bodyrate(const struct ECL_ControlData &ctl_data);
-
-	/* Additional setters */
-	void set_coordinated_min_speed(float coordinated_min_speed)
-	{
-		_coordinated_min_speed = coordinated_min_speed;
-	}
+	float control_attitude(const struct ECL_ControlData &ctl_data) override;
+	float control_euler_rate(const struct ECL_ControlData &ctl_data) override;
+	float control_bodyrate(const struct ECL_ControlData &ctl_data) override;
 
 	void set_coordinated_method(int32_t coordinated_method)
 	{
-		_coordinated_method = coordinated_method;
+		switch (coordinated_method) {
+		case COORD_METHOD_OPEN:
+		case COORD_METHOD_CLOSEACC:
+			_coordinated_method = coordinated_method;
+			break;
+
+		default:
+			ECL_WARN("invalid param setting FW_YCO_METHOD");
+		}
 	}
 
 	enum {
@@ -81,15 +79,7 @@ public:
 	};
 
 protected:
-	float _coordinated_min_speed;
-	float _max_rate;
-
-	int32_t _coordinated_method;
-
-	float control_attitude_impl_openloop(const struct ECL_ControlData &ctl_data);
-
-	float control_attitude_impl_accclosedloop(const struct ECL_ControlData &ctl_data);
-
+	int32_t _coordinated_method{0};
 };
 
 #endif // ECL_YAW_CONTROLLER_H

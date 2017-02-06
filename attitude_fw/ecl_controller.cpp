@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2013 Estimation and Control Library (ECL). All rights reserved.
+ *   Copyright (c) 2013-2017 Estimation and Control Library (ECL). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,7 +38,7 @@
  * @author Lorenz Meier <lm@inf.ethz.ch>
  * @author Thomas Gubler <thomasgubler@gmail.com>
  *
- * Acknowledgements:
+ * Acknowledgments:
  *
  *   The control design is based on a design
  *   by Paul Riseborough and Andrew Tridgell, 2013,
@@ -48,24 +48,7 @@
 
 #include "ecl_controller.h"
 
-#include <stdio.h>
 #include <mathlib/mathlib.h>
-
-ECL_Controller::ECL_Controller(const char *name) :
-	_last_run(0),
-	_tc(0.1f),
-	_k_p(0.0f),
-	_k_i(0.0f),
-	_k_ff(0.0f),
-	_integrator_max(0.0f),
-	_max_rate(0.0f),
-	_last_output(0.0f),
-	_integrator(0.0f),
-	_rate_error(0.0f),
-	_rate_setpoint(0.0f),
-	_bodyrate_setpoint(0.0f)
-{
-}
 
 void ECL_Controller::reset_integrator()
 {
@@ -101,7 +84,18 @@ void ECL_Controller::set_integrator_max(float max)
 
 void ECL_Controller::set_max_rate(float max_rate)
 {
-	_max_rate = max_rate;
+	_max_rate_pos = max_rate;
+	_max_rate_neg = max_rate;
+}
+
+void ECL_Controller::set_max_rate_pos(float max_rate_pos)
+{
+	_max_rate_pos = max_rate_pos;
+}
+
+void ECL_Controller::set_max_rate_neg(float max_rate_neg)
+{
+	_max_rate_neg = max_rate_neg;
 }
 
 float ECL_Controller::get_rate_error()
@@ -109,22 +103,49 @@ float ECL_Controller::get_rate_error()
 	return _rate_error;
 }
 
-float ECL_Controller::get_desired_rate()
-{
-	return _rate_setpoint;
-}
-
 float ECL_Controller::get_desired_bodyrate()
 {
 	return _bodyrate_setpoint;
 }
 
-float ECL_Controller::constrain_airspeed(float airspeed, float minspeed, float maxspeed)
+float ECL_Controller::get_desired_rate()
+{
+	return _rate_setpoint;
+}
+
+void ECL_Controller::set_desired_bodyrate(const float body_rate)
+{
+	// limit the body angular rate
+	if (_max_rate_pos > 0.01f && _max_rate_neg > 0.01f) {
+
+		_bodyrate_setpoint = constrain(body_rate, -_max_rate_neg, _max_rate_pos);
+
+	} else {
+		_bodyrate_setpoint = 0.0f;
+	}
+
+	if (!PX4_ISFINITE(_bodyrate_setpoint)) {
+		ECL_INFO("body rate setpoint not finite");
+		_bodyrate_setpoint = 0.0f;
+	}
+}
+
+void ECL_Controller::set_desired_rate(const float rate)
+{
+	_rate_setpoint = rate;
+
+	if (!PX4_ISFINITE(_rate_setpoint)) {
+		ECL_INFO("euler rate setpoint not finite");
+		_rate_setpoint = 0.0f;
+	}
+}
+
+float ECL_Controller::constrain_airspeed(const float airspeed, const float minspeed, const float maxspeed)
 {
 	float airspeed_result = airspeed;
 
 	if (!PX4_ISFINITE(airspeed)) {
-		/* airspeed is NaN, +- INF or not available, pick center of band */
+		// airspeed is NaN, +- INF or not available, pick center of band
 		airspeed_result = 0.5f * (minspeed + maxspeed);
 
 	} else if (airspeed < minspeed) {
@@ -132,4 +153,34 @@ float ECL_Controller::constrain_airspeed(float airspeed, float minspeed, float m
 	}
 
 	return airspeed_result;
+}
+
+void ECL_Controller::update_integrator(const bool lock)
+{
+	bool lock_integrator = lock;
+
+	// dt estimate
+	const float dt = ecl_elapsed_time(&_last_run) * 1e-6f;
+	_last_run = ecl_absolute_time();
+
+	if (dt > 0.5f) {
+		lock_integrator = true;
+	}
+
+	if (!lock_integrator && _k_i > 0.0f) {
+
+		float id = _rate_error * dt;
+
+		// anti-windup: do not allow integrator to increase if actuator is at limit
+		if (_last_output < -1.0f) {
+			// only allow motion to center: increase value
+			id = max(id, 0.0f);
+
+		} else if (_last_output > 1.0f) {
+			// only allow motion to center: decrease value
+			id = min(id, 0.0f);
+		}
+
+		_integrator = constrain(_integrator + id * _k_i, -_integrator_max, _integrator_max);
+	}
 }

@@ -38,7 +38,7 @@
  * @author Lorenz Meier <lm@inf.ethz.ch>
  * @author Thomas Gubler <thomasgubler@gmail.com>
  *
- * Acknowledgements:
+ * Acknowledgments:
  *
  *   The control design is based on a design
  *   by Paul Riseborough and Andrew Tridgell, 2013,
@@ -46,25 +46,25 @@
  *   Jonathan Challinger, 2012.
  */
 
-#pragma once
+#ifndef ECL_CONTROLLER_H
+#define ECL_CONTROLLER_H
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <systemlib/perf_counter.h>
+#include <ecl/ecl.h>
+#include <geo/geo.h>
+#include <mathlib/mathlib.h>
+
+using math::constrain;
+using math::radians;
+using math::max;
+using math::min;
 
 struct ECL_ControlData {
 	float roll;
 	float pitch;
 	float yaw;
-	float body_x_rate;
-	float body_y_rate;
-	float body_z_rate;
-	float speed_body_u;
-	float speed_body_v;
-	float speed_body_w;
-	float acc_body_x;
-	float acc_body_y;
-	float acc_body_z;
+	float roll_rate;
+	float pitch_rate;
+	float yaw_rate;
 	float roll_setpoint;
 	float pitch_setpoint;
 	float yaw_setpoint;
@@ -74,32 +74,35 @@ struct ECL_ControlData {
 	float airspeed_min;
 	float airspeed_max;
 	float airspeed;
-	float scaler;
+	float airspeed_scaler;
+	float acc_body_y;
 	float groundspeed;
-	float groundspeed_scaler;
 	bool lock_integrator;
 };
 
 class __EXPORT ECL_Controller
 {
 public:
-	ECL_Controller(const char *name);
-	~ECL_Controller() = default;
+	ECL_Controller() = default;
+	virtual ~ECL_Controller() = default;
 
 	virtual float control_attitude(const struct ECL_ControlData &ctl_data) = 0;
 	virtual float control_euler_rate(const struct ECL_ControlData &ctl_data) = 0;
 	virtual float control_bodyrate(const struct ECL_ControlData &ctl_data) = 0;
 
-	/* Setters */
 	void set_time_constant(float time_constant);
 	void set_k_p(float k_p);
 	void set_k_i(float k_i);
 	void set_k_ff(float k_ff);
 	void set_integrator_max(float max);
-	void set_max_rate(float max_rate);
-	void set_bodyrate_setpoint(float rate) {_bodyrate_setpoint = rate;};
 
-	/* Getters */
+	void set_max_rate(float max_rate);
+	void set_max_rate_pos(float max_rate_pos);
+	void set_max_rate_neg(float max_rate_neg);
+
+	void set_desired_bodyrate(float body_rate);
+	void set_desired_rate(float rate);
+
 	float get_rate_error();
 	float get_desired_rate();
 	float get_desired_bodyrate();
@@ -107,17 +110,23 @@ public:
 	void reset_integrator();
 
 protected:
-	uint64_t _last_run;
-	float _tc;
-	float _k_p;
-	float _k_i;
-	float _k_ff;
-	float _integrator_max;
-	float _max_rate;
-	float _last_output;
-	float _integrator;
-	float _rate_error;
-	float _rate_setpoint;
-	float _bodyrate_setpoint;
+	hrt_abstime _last_run{0};
+	float _tc{0.5f};
+	float _k_p{0.0f};
+	float _k_i{0.0f};
+	float _k_ff{0.0f};
+	float _integrator_max{0.0f};
+	float _max_rate_pos{0.0f};
+	float _max_rate_neg{0.0f};
+	float _last_output{0.0f};
+	float _integrator{0.0f};
+	float _rate_error{0.0f};
+	float _rate_setpoint{0.0f};
+	float _bodyrate_setpoint{0.0f};
+
 	float constrain_airspeed(float airspeed, float minspeed, float maxspeed);
+
+	void update_integrator(bool lock);
 };
+
+#endif // ECL_CONTROLLER_H
