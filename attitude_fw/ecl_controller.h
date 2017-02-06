@@ -87,8 +87,11 @@ public:
 	virtual ~ECL_Controller() = default;
 
 	virtual float control_attitude(const struct ECL_ControlData &ctl_data) = 0;
-	virtual float control_euler_rate(const struct ECL_ControlData &ctl_data) = 0;
 	virtual float control_bodyrate(const struct ECL_ControlData &ctl_data) = 0;
+
+	virtual float get_desired_bodyrate(const struct ECL_ControlData &ctl_data);
+
+	void set_desired_bodyrate(float body_rate);
 
 	void set_time_constant(float time_constant);
 	void set_k_p(float k_p);
@@ -99,13 +102,6 @@ public:
 	void set_max_rate(float max_rate);
 	void set_max_rate_pos(float max_rate_pos);
 	void set_max_rate_neg(float max_rate_neg);
-
-	void set_desired_bodyrate(float body_rate);
-	void set_desired_rate(float rate);
-
-	float get_rate_error();
-	float get_desired_rate();
-	float get_desired_bodyrate();
 
 	void reset_integrator();
 

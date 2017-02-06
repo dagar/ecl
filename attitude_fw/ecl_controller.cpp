@@ -50,70 +50,71 @@
 
 #include <mathlib/mathlib.h>
 
-void ECL_Controller::reset_integrator()
+void
+ECL_Controller::reset_integrator()
 {
 	_integrator = 0.0f;
 }
 
-void ECL_Controller::set_time_constant(float time_constant)
+void
+ECL_Controller::set_time_constant(float time_constant)
 {
 	if (time_constant > 0.1f && time_constant < 3.0f) {
 		_tc = time_constant;
 	}
 }
 
-void ECL_Controller::set_k_p(float k_p)
+void
+ECL_Controller::set_k_p(float k_p)
 {
 	_k_p = k_p;
 }
 
-void ECL_Controller::set_k_i(float k_i)
+void
+ECL_Controller::set_k_i(float k_i)
 {
 	_k_i = k_i;
 }
 
-void ECL_Controller::set_k_ff(float k_ff)
+void
+ECL_Controller::set_k_ff(float k_ff)
 {
 	_k_ff = k_ff;
 }
 
-void ECL_Controller::set_integrator_max(float max)
+void
+ECL_Controller::set_integrator_max(float max)
 {
 	_integrator_max = max;
 }
 
-void ECL_Controller::set_max_rate(float max_rate)
+void
+ECL_Controller::set_max_rate(float max_rate)
 {
 	_max_rate_pos = max_rate;
 	_max_rate_neg = max_rate;
 }
 
-void ECL_Controller::set_max_rate_pos(float max_rate_pos)
+void
+ECL_Controller::set_max_rate_pos(float max_rate_pos)
 {
 	_max_rate_pos = max_rate_pos;
 }
 
-void ECL_Controller::set_max_rate_neg(float max_rate_neg)
+void
+ECL_Controller::set_max_rate_neg(float max_rate_neg)
 {
 	_max_rate_neg = max_rate_neg;
 }
 
-float ECL_Controller::get_rate_error()
-{
-	return _rate_error;
-}
-
-float ECL_Controller::get_desired_bodyrate()
+float
+ECL_Controller::get_desired_bodyrate(const struct ECL_ControlData &ctl_data)
 {
 	return _bodyrate_setpoint;
 }
 
-float ECL_Controller::get_desired_rate()
-{
-	return _rate_setpoint;
-}
-
-void ECL_Controller::set_desired_bodyrate(const float body_rate)
+void
+ECL_Controller::set_desired_bodyrate(const float body_rate)
 {
 	// limit the body angular rate
 	if (_max_rate_pos > 0.01f && _max_rate_neg > 0.01f) {
@@ -125,22 +126,12 @@ void ECL_Controller::set_desired_bodyrate(const float body_rate)
 	}
 
 	if (!PX4_ISFINITE(_bodyrate_setpoint)) {
-		ECL_INFO("body rate setpoint not finite");
 		_bodyrate_setpoint = 0.0f;
 	}
 }
 
-void ECL_Controller::set_desired_rate(const float rate)
-{
-	_rate_setpoint = rate;
-
-	if (!PX4_ISFINITE(_rate_setpoint)) {
-		ECL_INFO("euler rate setpoint not finite");
-		_rate_setpoint = 0.0f;
-	}
-}
-
-float ECL_Controller::constrain_airspeed(const float airspeed, const float minspeed, const float maxspeed)
+float
+ECL_Controller::constrain_airspeed(const float airspeed, const float minspeed, const float maxspeed)
 {
 	float airspeed_result = airspeed;
 
@@ -155,7 +146,8 @@ float ECL_Controller::constrain_airspeed(const float airspeed, const float minsp
 	return airspeed_result;
 }
 
-void ECL_Controller::update_integrator(const bool lock)
+void
+ECL_Controller::update_integrator(const bool lock)
 {
 	bool lock_integrator = lock;
 

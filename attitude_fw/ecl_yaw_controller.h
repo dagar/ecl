@@ -57,8 +57,9 @@ public:
 	~ECL_YawController() = default;
 
 	float control_attitude(const struct ECL_ControlData &ctl_data) override;
-	float control_euler_rate(const struct ECL_ControlData &ctl_data) override;
 	float control_bodyrate(const struct ECL_ControlData &ctl_data) override;
+
+	float get_desired_bodyrate(const struct ECL_ControlData &ctl_data) override;
 
 	void set_coordinated_method(int32_t coordinated_method)
 	{

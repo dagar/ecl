@@ -40,7 +40,8 @@
 
 #include "ecl_roll_controller.h"
 
-float ECL_RollController::control_attitude(const struct ECL_ControlData &ctl_data)
+float
+ECL_RollController::control_attitude(const struct ECL_ControlData &ctl_data)
 {
 	// do not calculate control signal with bad inputs
 	if (!(PX4_ISFINITE(ctl_data.roll_setpoint) &&
@@ -53,12 +54,13 @@ float ECL_RollController::control_attitude(const struct ECL_ControlData &ctl_dat
 	const float roll_error = ctl_data.roll_setpoint - ctl_data.roll;
 
 	// apply P controller: rate setpoint from current error and time constant
-	set_desired_rate(roll_error / _tc);
+	_rate_setpoint = roll_error / _tc;
 
 	return _rate_setpoint;
 }
 
-float ECL_RollController::control_bodyrate(const struct ECL_ControlData &ctl_data)
+float
+ECL_RollController::control_bodyrate(const struct ECL_ControlData &ctl_data)
 {
 	// do not calculate control signal with bad inputs
 	if (!(PX4_ISFINITE(ctl_data.roll_rate) &&
@@ -79,10 +81,11 @@ float ECL_RollController::control_bodyrate(const struct ECL_ControlData &ctl_dat
 	return constrain(_last_output, -1.0f, 1.0f);
 }
 
-float ECL_RollController::control_euler_rate(const struct ECL_ControlData &ctl_data)
+float
+ECL_RollController::get_desired_bodyrate(const struct ECL_ControlData &ctl_data)
 {
 	// Transform setpoint to body angular rates (jacobian)
-	set_desired_bodyrate(ctl_data.roll_rate_setpoint - sinf(ctl_data.pitch) * ctl_data.yaw_rate_setpoint);
+	set_desired_bodyrate(_rate_setpoint - sinf(ctl_data.pitch) * ctl_data.yaw_rate_setpoint);
 
-	return control_bodyrate(ctl_data);
+	return _bodyrate_setpoint;
 }

@@ -40,7 +40,8 @@
 
 #include "ecl_wheel_controller.h"
 
-float ECL_WheelController::control_attitude(const struct ECL_ControlData &ctl_data)
+float
+ECL_WheelController::control_attitude(const struct ECL_ControlData &ctl_data)
 {
 	// do not calculate control signal with bad inputs
 	if (!(PX4_ISFINITE(ctl_data.yaw_setpoint) &&
@@ -56,12 +57,13 @@ float ECL_WheelController::control_attitude(const struct ECL_ControlData &ctl_da
 	yaw_error = fmodf(fmodf(yaw_error + M_PI_F, M_TWOPI_F) + M_TWOPI_F, M_TWOPI_F) - M_PI_F;
 
 	// apply P controller: rate setpoint from current error and time constant
-	set_desired_rate(yaw_error / _tc);
+	_rate_setpoint = yaw_error / _tc;
 
 	return _rate_setpoint;
 }
 
-float ECL_WheelController::control_bodyrate(const struct ECL_ControlData &ctl_data)
+float
+ECL_WheelController::control_bodyrate(const struct ECL_ControlData &ctl_data)
 {
 	// do not calculate control signal with bad inputs
 	if (!(PX4_ISFINITE(ctl_data.yaw_rate) &&
@@ -93,9 +95,4 @@ float ECL_WheelController::control_bodyrate(const struct ECL_ControlData &ctl_da
 		       (_rate_error * _k_p + _integrator) * gndspd_scaler * gndspd_scaler;
 
 	return constrain(_last_output, -1.0f, 1.0f);
-}
-
-float ECL_WheelController::control_euler_rate(const struct ECL_ControlData &ctl_data)
-{
-	return 0.0f;
 }

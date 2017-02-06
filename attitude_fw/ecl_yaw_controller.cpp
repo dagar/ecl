@@ -40,7 +40,8 @@
 
 #include "ecl_yaw_controller.h"
 
-float ECL_YawController::control_attitude(const struct ECL_ControlData &ctl_data)
+float
+ECL_YawController::control_attitude(const struct ECL_ControlData &ctl_data)
 {
 	if (_coordinated_method == COORD_METHOD_OPEN) {
 		// do not calculate control signal with bad inputs
@@ -83,7 +84,7 @@ float ECL_YawController::control_attitude(const struct ECL_ControlData &ctl_data
 
 		if (!inverted) {
 			// Calculate desired yaw rate from coordinated turn constraint / (no side forces)
-			set_desired_rate(tanf(constrained_roll) * cosf(ctl_data.pitch) * CONSTANTS_ONE_G / airspeed);
+			_rate_setpoint = tanf(constrained_roll) * cosf(ctl_data.pitch) * CONSTANTS_ONE_G / airspeed;
 		}
 
 	} else if (_coordinated_method == COORD_METHOD_CLOSEACC) {
@@ -98,7 +99,8 @@ float ECL_YawController::control_attitude(const struct ECL_ControlData &ctl_data
 	return _rate_setpoint;
 }
 
-float ECL_YawController::control_bodyrate(const struct ECL_ControlData &ctl_data)
+float
+ECL_YawController::control_bodyrate(const struct ECL_ControlData &ctl_data)
 {
 	// do not calculate control signal with bad inputs
 	if (!(PX4_ISFINITE(ctl_data.yaw_rate) &&
@@ -131,11 +133,12 @@ float ECL_YawController::control_bodyrate(const struct ECL_ControlData &ctl_data
 	return constrain(_last_output, -1.0f, 1.0f);
 }
 
-float ECL_YawController::control_euler_rate(const struct ECL_ControlData &ctl_data)
+float
+ECL_YawController::get_desired_bodyrate(const struct ECL_ControlData &ctl_data)
 {
 	// Transform setpoint to body angular rates (jacobian)
-	set_desired_bodyrate(-sinf(ctl_data.roll) * ctl_data.pitch_rate_setpoint
+	set_desired_bodyrate(-sinf(ctl_data.roll) * _rate_setpoint
 			     + cosf(ctl_data.roll) * cosf(ctl_data.pitch) * _rate_setpoint);
 
-	return control_bodyrate(ctl_data);
+	return _bodyrate_setpoint;
 }
