@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2013 Estimation and Control Library (ECL). All rights reserved.
+ *   Copyright (c) 2013-2017 Estimation and Control Library (ECL). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,7 +36,7 @@
  * Implementation of L1 position control.
  *
  *
- * Acknowledgements and References:
+ * Acknowledgments and References:
  *
  *    This implementation has been built for PX4 based on the original
  *    publication from [1] and does include a lot of the ideas (not code)
@@ -64,6 +64,13 @@
 #include <geo/geo.h>
 #include <ecl/ecl.h>
 
+using math::constrain;
+using math::min;
+using math::max;
+using math::radians;
+
+using matrix::Vector2f;
+
 /**
  * L1 Nonlinear Guidance Logic
  */
@@ -83,7 +90,7 @@ public:
 		_L1_ratio(5.0),
 		_K_L1(2.0),
 		_heading_omega(1.0),
-		_roll_lim_rad(math::radians(10.0))
+		_roll_lim_rad(radians(10.0))
 	{
 	}
 
@@ -145,14 +152,12 @@ public:
 	/**
 	 * Returns true if following a circle (loiter)
 	 */
-	bool circle_mode() {
-		return _circle_mode;
-	}
+	bool circle_mode();
 
 
 	/**
 	 * Get the switch distance
-	 * 
+	 *
 	 * This is the distance at which the system will
 	 * switch to the next waypoint. This depends on the
 	 * period and damping
@@ -172,8 +177,8 @@ public:
 	 *
 	 * @return sets _lateral_accel setpoint
 	 */
-	void navigate_waypoints(const math::Vector<2> &vector_A, const math::Vector<2> &vector_B, const math::Vector<2> &vector_curr_position,
-			   const math::Vector<2> &ground_speed);
+	void navigate_waypoints(const Vector2f &vector_A, const Vector2f &vector_B,
+				const Vector2f &curr_pos, const Vector2f &ground_speed_vector);
 
 
 	/**
@@ -184,8 +189,8 @@ public:
 	 *
 	 * @return sets _lateral_accel setpoint
 	 */
-	void navigate_loiter(const math::Vector<2> &vector_A, const math::Vector<2> &vector_curr_position, float radius, int8_t loiter_direction,
-			   const math::Vector<2> &ground_speed_vector);
+	void navigate_loiter(const Vector2f &vector_A, const Vector2f &curr_position, float radius,
+			     int8_t loiter_direction, const Vector2f &ground_speed_vector);
 
 
 	/**
@@ -197,7 +202,7 @@ public:
 	 *
 	 * @return sets _lateral_accel setpoint
 	 */
-	void navigate_heading(float navigation_heading, float current_heading, const math::Vector<2> &ground_speed);
+	void navigate_heading(float navigation_heading, float current_heading, const Vector2f &ground_speed_vector);
 
 
 	/**
@@ -212,7 +217,8 @@ public:
 	/**
 	 * Set the L1 period.
 	 */
-	void set_l1_period(float period) {
+	void set_l1_period(float period)
+	{
 		_L1_period = period;
 		/* calculate the ratio introduced in [2] */
 		_L1_ratio = 1.0f / M_PI_F * _L1_damping * _L1_period;
@@ -226,7 +232,8 @@ public:
 	 *
 	 * The original publication recommends a default of sqrt(2) / 2 = 0.707
 	 */
-	void set_l1_damping(float damping) {
+	void set_l1_damping(float damping)
+	{
 		_L1_damping = damping;
 		/* calculate the ratio introduced in [2] */
 		_L1_ratio = 1.0f / M_PI_F * _L1_damping * _L1_period;
@@ -239,7 +246,8 @@ public:
 	 * Set the maximum roll angle output in radians
 	 *
 	 */
-	void set_l1_roll_limit(float roll_lim_rad) {
+	void set_l1_roll_limit(float roll_lim_rad)
+	{
 		_roll_lim_rad = roll_lim_rad;
 	}
 
@@ -272,7 +280,7 @@ private:
 	 * @param wp The point to convert to into the local coordinates, in WGS84 coordinates
 	 * @return The vector in meters pointing from the reference position to the coordinates
 	 */
-	math::Vector<2> get_local_planar_vector(const math::Vector<2> &origin, const math::Vector<2> &target) const;
+	Vector2f get_local_planar_vector(const Vector2f &origin, const Vector2f &target) const;
 
 };
 
