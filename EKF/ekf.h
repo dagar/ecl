@@ -176,21 +176,21 @@ public:
 	// return the amount the local horizontal position changed in the last reset and the number of reset events
 	void get_posNE_reset(float delta[2], uint8_t *counter)
 	{
-		memcpy(delta, &_state_reset_status.posNE_change._data[0], sizeof(_state_reset_status.posNE_change._data));
+		_state_reset_status.posNE_change.copyTo(delta);
 		*counter = _state_reset_status.posNE_counter;
 	}
 
 	// return the amount the local horizontal velocity changed in the last reset and the number of reset events
 	void get_velNE_reset(float delta[2], uint8_t *counter)
 	{
-		memcpy(delta, &_state_reset_status.velNE_change._data[0], sizeof(_state_reset_status.velNE_change._data));
+		_state_reset_status.velNE_change.copyTo(delta);
 		*counter = _state_reset_status.velNE_counter;
 	}
 
 	// return the amount the quaternion has changed in the last reset and the number of reset events
 	void get_quat_reset(float delta_quat[4], uint8_t *counter)
 	{
-		memcpy(delta_quat, &_state_reset_status.quat_change._data[0], sizeof(_state_reset_status.quat_change._data));
+		_state_reset_status.quat_change.copyTo(delta_quat);
 		*counter = _state_reset_status.quat_counter;
 	}
 

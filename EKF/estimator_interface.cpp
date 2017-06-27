@@ -66,14 +66,16 @@ void EstimatorInterface::setIMUData(uint64_t time_usec, uint64_t delta_ang_dt, u
 	}
 
 	// copy data
-	imuSample imu_sample_new = {};
-	imu_sample_new.delta_ang = Vector3f(delta_ang);
-	imu_sample_new.delta_vel = Vector3f(delta_vel);
+	imuSample imu_sample_new = {
+		.delta_ang = Vector3f(delta_ang),
+		.delta_vel = Vector3f(delta_vel),
 
-	// convert time from us to secs
-	imu_sample_new.delta_ang_dt = delta_ang_dt / 1e6f;
-	imu_sample_new.delta_vel_dt = delta_vel_dt / 1e6f;
-	imu_sample_new.time_us = time_usec;
+		// convert time from us to secs
+		.delta_ang_dt = delta_ang_dt / 1e6f,
+		.delta_vel_dt = delta_vel_dt / 1e6f,
+		.time_us = time_usec
+	};
+
 	_imu_ticks++;
 
 	// calculate a metric which indicates the amount of coning vibration
@@ -382,6 +384,7 @@ bool EstimatorInterface::initialise_interface(uint64_t timestamp)
 	      _drag_buffer.allocate(_obs_buffer_length) &&
 	      _output_buffer.allocate(_imu_buffer_length) &&
 	      _output_vert_buffer.allocate(_imu_buffer_length))) {
+
 		ECL_ERR("EKF buffer allocation failed!");
 		unallocate_buffers();
 		return false;
