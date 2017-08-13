@@ -40,7 +40,7 @@
  */
 
 #include "data_validator.h"
-#include <ecl/ecl.h>
+#include "ecl.h"
 
 DataValidator::DataValidator(DataValidator *prev_sibling) :
 	_error_mask(ERROR_FLAG_NO_ERROR),

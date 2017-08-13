@@ -55,9 +55,9 @@ ECL_WheelController::ECL_WheelController() :
 float ECL_WheelController::control_bodyrate(const struct ECL_ControlData &ctl_data)
 {
 	/* Do not calculate control signal with bad inputs */
-	if (!(PX4_ISFINITE(ctl_data.body_z_rate) &&
-	      PX4_ISFINITE(ctl_data.groundspeed) &&
-	      PX4_ISFINITE(ctl_data.groundspeed_scaler))) {
+	if (!(ISFINITE(ctl_data.body_z_rate) &&
+	      ISFINITE(ctl_data.groundspeed) &&
+	      ISFINITE(ctl_data.groundspeed_scaler))) {
 		return math::constrain(_last_output, -1.0f, 1.0f);
 	}
 
@@ -113,8 +113,8 @@ float ECL_WheelController::control_bodyrate(const struct ECL_ControlData &ctl_da
 float ECL_WheelController::control_attitude(const struct ECL_ControlData &ctl_data)
 {
 	/* Do not calculate control signal with bad inputs */
-	if (!(PX4_ISFINITE(ctl_data.yaw_setpoint) &&
-	      PX4_ISFINITE(ctl_data.yaw))) {
+	if (!(ISFINITE(ctl_data.yaw_setpoint) &&
+	      ISFINITE(ctl_data.yaw))) {
 		return _rate_setpoint;
 	}
 

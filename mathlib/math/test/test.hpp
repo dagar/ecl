@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (C) 2012, 2014 PX4 Development Team. All rights reserved.
+ *   Copyright (C) 2012 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,35 +32,23 @@
  ****************************************************************************/
 
 /**
- * @file mathlib.h
+ * @file test.hpp
  *
- * Target specific math functions and definitions
- *
- * @author Siddharth Bharat Purohit <siddharthbharatpurohit@gmail.com>
+ * Controller library code
  */
-#ifndef MATHLIB_H
-#define MATHLIB_H
-#ifdef POSIX_SHARED
-// #include <Eigen/Dense>
-// #include <algorithm>
-#define M_PI_F 3.14159265358979323846f
 
-#ifndef M_PI
-#define M_PI (3.14159265358979323846f)
-#endif
+#pragma once
 
-namespace math
-{
-// using namespace Eigen;
+//#include <assert.h>
+//#include <time.h>
+//#include <stdlib.h>
 
-float min(float val1, float val2);
-float max(float val1, float val2);
-float constrain(float val, float min, float max);
-float radians(float degrees);
-float degrees(float radians);
+bool equal(float a, float b, float eps = 1e-5);
 
-}
-#else
-#include <mathlib/mathlib.h>
-#endif //POSIX_SHARED
-#endif //MATHLIB_H
+bool greater_than(float a, float b);
+
+bool less_than(float a, float b);
+
+bool greater_than_or_equal(float a, float b);
+
+bool less_than_or_equal(float a, float b);

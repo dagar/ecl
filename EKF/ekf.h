@@ -41,7 +41,9 @@
  */
 
 #include "estimator_interface.h"
-#include "geo.h"
+
+#include "mathlib/mathlib.h"
+#include "geo/geo.h"
 
 class Ekf : public EstimatorInterface
 {

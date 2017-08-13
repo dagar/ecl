@@ -41,6 +41,8 @@
 
 #pragma once
 
+#include "ecl.h"
+
 #include <cmath>
 #include <stdint.h>
 

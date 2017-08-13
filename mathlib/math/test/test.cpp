@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2013 Estimation and Control Library (ECL). All rights reserved.
+ *   Copyright (C) 2012 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -12,7 +12,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name APL nor the names of its contributors may be
+ * 3. Neither the name PX4 nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -32,48 +32,70 @@
  ****************************************************************************/
 
 /**
- * @file ecl.h
- * Adapter / shim layer for system calls needed by ECL
+ * @file test.cpp
  *
+ * Test library code
  */
-#pragma once
 
-#if defined(__PX4_POSIX) || defined(__PX4_NUTTX)
+#include "ecl.h"
 
-#include <drivers/drv_hrt.h>
-#include <px4_log.h>
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
 
-#define ecl_absolute_time hrt_absolute_time
-#define ecl_elapsed_time hrt_elapsed_time
-#define ECL_INFO PX4_INFO
-#define ECL_WARN PX4_WARN
-#define ECL_ERR	 PX4_ERR
+#include "test.hpp"
 
-#else
+bool __EXPORT equal(float a, float b, float epsilon)
+{
+	float diff = fabsf(a - b);
 
-#include <cstdio>
+	if (diff > epsilon) {
+		printf("not equal ->\n\ta: %12.8f\n\tb: %12.8f\n", double(a), double(b));
+		return false;
 
-#define ECL_INFO printf
-#define ECL_WARN printf
-#define ECL_ERR printf
+	} else { return true; }
+}
 
-#endif
+bool __EXPORT greater_than(float a, float b)
+{
+	if (a > b) {
+		return true;
 
-#ifdef __EXPORT
-#  undef __EXPORT
-#endif
-#define __EXPORT __attribute__ ((visibility ("default")))
+	} else {
+		printf("not a > b ->\n\ta: %12.8f\n\tb: %12.8f\n", double(a), double(b));
+		return false;
+	}
+}
 
-#ifndef __PX4_QURT
-#if defined(__cplusplus) && !defined(__PX4_NUTTX)
-#include <cmath>
-#define ISFINITE(x) std::isfinite(x)
-#else
-#define ISFINITE(x) isfinite(x)
-#endif
-#endif
+bool __EXPORT less_than(float a, float b)
+{
+	if (a < b) {
+		return true;
 
-#if defined(__PX4_QURT)
-// Missing math.h defines
-#define ISFINITE(x) __builtin_isfinite(x)
-#endif
+	} else {
+		printf("not a < b ->\n\ta: %12.8f\n\tb: %12.8f\n", double(a), double(b));
+		return false;
+	}
+}
+
+bool __EXPORT greater_than_or_equal(float a, float b)
+{
+	if (a >= b) {
+		return true;
+
+	} else {
+		printf("not a >= b ->\n\ta: %12.8f\n\tb: %12.8f\n", double(a), double(b));
+		return false;
+	}
+}
+
+bool __EXPORT less_than_or_equal(float a, float b)
+{
+	if (a <= b) {
+		return true;
+
+	} else {
+		printf("not a <= b ->\n\ta: %12.8f\n\tb: %12.8f\n", double(a), double(b));
+		return false;
+	}
+}

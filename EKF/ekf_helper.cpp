@@ -39,10 +39,10 @@
  *
  */
 
-#include "../ecl.h"
+#include "ecl.h"
 #include "ekf.h"
-#include "mathlib.h"
-#include <cstdlib>
+
+#include "mathlib/mathlib.h"
 
 // Reset the velocity states. If we have a recent and valid
 // gps measurement then use for velocity initialisation

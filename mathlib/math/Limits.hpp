@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2013 Estimation and Control Library (ECL). All rights reserved.
+ *   Copyright (c) 2013 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -12,7 +12,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name APL nor the names of its contributors may be
+ * 3. Neither the name PX4 nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -32,48 +32,51 @@
  ****************************************************************************/
 
 /**
- * @file ecl.h
- * Adapter / shim layer for system calls needed by ECL
+ * @file Limits.hpp
  *
+ * Limiting / constrain helper functions
  */
+
 #pragma once
 
-#if defined(__PX4_POSIX) || defined(__PX4_NUTTX)
+#include "ecl.h"
 
-#include <drivers/drv_hrt.h>
-#include <px4_log.h>
-
-#define ecl_absolute_time hrt_absolute_time
-#define ecl_elapsed_time hrt_elapsed_time
-#define ECL_INFO PX4_INFO
-#define ECL_WARN PX4_WARN
-#define ECL_ERR	 PX4_ERR
-
-#else
-
-#include <cstdio>
-
-#define ECL_INFO printf
-#define ECL_WARN printf
-#define ECL_ERR printf
-
+//this should be defined in stdint.h, but seems to be missing in the ARM toolchain (5.2.0)
+#ifndef UINT64_C
+# if __WORDSIZE == 64
+#  define UINT64_C(c)	c ## UL
+# else
+#  define UINT64_C(c)	c ## ULL
+# endif
 #endif
 
-#ifdef __EXPORT
-#  undef __EXPORT
-#endif
-#define __EXPORT __attribute__ ((visibility ("default")))
+namespace math
+{
 
-#ifndef __PX4_QURT
-#if defined(__cplusplus) && !defined(__PX4_NUTTX)
-#include <cmath>
-#define ISFINITE(x) std::isfinite(x)
-#else
-#define ISFINITE(x) isfinite(x)
-#endif
-#endif
+template<typename _Tp>
+constexpr const _Tp &min(const _Tp &a, const _Tp &b)
+{
+	return (a < b) ? a : b;
+}
 
-#if defined(__PX4_QURT)
-// Missing math.h defines
-#define ISFINITE(x) __builtin_isfinite(x)
-#endif
+template<typename _Tp>
+constexpr const _Tp &max(const _Tp &a, const _Tp &b)
+{
+	return (a > b) ? a : b;
+}
+
+template<typename _Tp>
+constexpr const _Tp &constrain(const _Tp &val, const _Tp &min_val, const _Tp &max_val)
+{
+	return (val < min_val) ? min_val : ((val > max_val) ? max_val : val);
+}
+
+float __EXPORT radians(float degrees);
+
+double __EXPORT radians(double degrees);
+
+float __EXPORT degrees(float radians);
+
+double __EXPORT degrees(double radians);
+
+}

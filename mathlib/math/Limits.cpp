@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (C) 2012, 2014 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2013 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,45 +32,42 @@
  ****************************************************************************/
 
 /**
- * @file mathlib.cpp
+ * @file Limits.cpp
  *
- * Definition of math namespace function for POSIX SHARED
- *
- * @author Siddharth Bharat Purohit <siddharthbharatpurohit@gmail.com>
+ * Limiting / constrain helper functions
  */
-#include "mathlib.h"
 
-#ifdef POSIX_SHARED
 
+#include <math.h>
+#include <stdint.h>
+
+#include "Limits.hpp"
 
 namespace math
 {
 
-float min(float val1, float val2)
-{
-	return (val1 < val2) ? val1 : val2;
-}
+#ifndef M_PI_F
+#define M_PI_F 3.14159265358979323846f
+#endif
 
-float max(float val1, float val2)
-{
-	return (val1 > val2) ? val1 : val2;
-}
-
-float constrain(float val, float min, float max)
-{
-	return (val < min) ? min : ((val > max) ? max : val);
-}
-
-float radians(float degrees)
+float __EXPORT radians(float degrees)
 {
 	return (degrees / 180.0f) * M_PI_F;
 }
 
-float degrees(float radians)
+double __EXPORT radians(double degrees)
 {
-	return (radians * 180.0f) / M_PI_F;
+	return (degrees / 180.0) * M_PI;
+}
+
+float __EXPORT degrees(float radians)
+{
+	return (radians / M_PI_F) * 180.0f;
+}
+
+double __EXPORT degrees(double radians)
+{
+	return (radians / M_PI) * 180.0;
 }
 
 }
-
-#endif

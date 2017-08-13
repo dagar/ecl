@@ -55,7 +55,7 @@ ECL_RollController::ECL_RollController() :
 float ECL_RollController::control_attitude(const struct ECL_ControlData &ctl_data)
 {
 	/* Do not calculate control signal with bad inputs */
-	if (!(PX4_ISFINITE(ctl_data.roll_setpoint) && PX4_ISFINITE(ctl_data.roll))) {
+	if (!(ISFINITE(ctl_data.roll_setpoint) && ISFINITE(ctl_data.roll))) {
 		return _rate_setpoint;
 	}
 
@@ -78,13 +78,13 @@ float ECL_RollController::control_attitude(const struct ECL_ControlData &ctl_dat
 float ECL_RollController::control_bodyrate(const struct ECL_ControlData &ctl_data)
 {
 	/* Do not calculate control signal with bad inputs */
-	if (!(PX4_ISFINITE(ctl_data.pitch) &&
-	      PX4_ISFINITE(ctl_data.body_x_rate) &&
-	      PX4_ISFINITE(ctl_data.body_z_rate) &&
-	      PX4_ISFINITE(ctl_data.yaw_rate_setpoint) &&
-	      PX4_ISFINITE(ctl_data.airspeed_min) &&
-	      PX4_ISFINITE(ctl_data.airspeed_max) &&
-	      PX4_ISFINITE(ctl_data.scaler))) {
+	if (!(ISFINITE(ctl_data.pitch) &&
+	      ISFINITE(ctl_data.body_x_rate) &&
+	      ISFINITE(ctl_data.body_z_rate) &&
+	      ISFINITE(ctl_data.yaw_rate_setpoint) &&
+	      ISFINITE(ctl_data.airspeed_min) &&
+	      ISFINITE(ctl_data.airspeed_max) &&
+	      ISFINITE(ctl_data.scaler))) {
 		return math::constrain(_last_output, -1.0f, 1.0f);
 	}
 

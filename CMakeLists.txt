@@ -31,34 +31,43 @@
 #
 ############################################################################
 
-px4_add_module(
-	MODULE lib__ecl
-	STACK_MAIN 6000
-	STACK_MAX 6000
-	COMPILE_FLAGS
-	SRCS
-		attitude_fw/ecl_controller.cpp
-		attitude_fw/ecl_pitch_controller.cpp
-		attitude_fw/ecl_roll_controller.cpp
-		attitude_fw/ecl_wheel_controller.cpp
-		attitude_fw/ecl_yaw_controller.cpp
-		EKF/airspeed_fusion.cpp
-		EKF/control.cpp
-		EKF/covariance.cpp
-		EKF/ekf.cpp
-		EKF/ekf_helper.cpp
-		EKF/estimator_interface.cpp
-		EKF/gps_checks.cpp
-		EKF/mag_fusion.cpp
-		EKF/optflow_fusion.cpp
-		EKF/sideslip_fusion.cpp
-		EKF/terrain_estimator.cpp
-		EKF/vel_pos_fusion.cpp
-		EKF/drag_fusion.cpp
-		l1/ecl_l1_pos_controller.cpp
-		validation/data_validator.cpp
-		validation/data_validator_group.cpp
-	DEPENDS
-		platforms__common
+cmake_minimum_required(VERSION 3.2)
+
+project(ECL CXX)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+
+# Find Eigen
+message("looking for FindEigen3.cmake in ${CMAKE_MODULE_PATH}")
+find_package(Eigen3 REQUIRED)
+if(NOT EIGEN3_INCLUDE_DIR)
+	message(FATAL_ERROR "Eigen3 not found.")
+endif()
+
+set(MATRIX_DIR ${CMAKE_SOURCE_DIR}/../matrix)
+if(NOT EXISTS "${MATRIX_DIR}/.git")
+	message(SEND_ERROR "The git submodules are not available. Please run git submodule update --init --recursive")
+endif()
+
+add_definitions(-DPOSIX_SHARED)
+add_definitions(-D__EXPORT)
+add_compile_options(
+	-pedantic
+	-std=c++11
+	-Wall
+	-Werror
+	-Wno-deprecated-declarations
+	-Wno-enum-compare
+	-Wno-unused-local-typedefs
+	-Wno-unused-parameter
 	)
-# vim: set noet ft=cmake fenc=utf-8 ff=unix :
+	
+include_directories(${CMAKE_SOURCE_DIR})
+include_directories(${CMAKE_SOURCE_DIR}/matrix)
+
+add_subdirectory(mathlib)
+#add_subdirectory(attitude_fw) # needs hrt
+add_subdirectory(EKF)
+#add_subdirectory(l1) # needs old matrix lib
+#add_subdirectory(validation) # needs hrt

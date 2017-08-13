@@ -44,21 +44,16 @@
  */
 #ifndef GEO_H
 #define GEO_H
-#ifdef POSIX_SHARED
-#include <stdbool.h>
-#include "mathlib.h"
 
-#define CONSTANTS_ONE_G					9.80665f		/* m/s^2		*/
-#define CONSTANTS_AIR_DENSITY_SEA_LEVEL_15C		1.225f			/* kg/m^3		*/
-#define CONSTANTS_AIR_GAS_CONST				287.1f 			/* J/(kg * K)		*/
-#define CONSTANTS_ABSOLUTE_NULL_CELSIUS			-273.15f		/* °C			*/
-#define CONSTANTS_RADIUS_OF_EARTH			6371000			/* meters (m)		*/
-#define M_TWOPI_F 6.28318530717958647692f
-#define M_PI_2_F  1.57079632679489661923f
-#define M_RAD_TO_DEG 57.29577951308232087679f
-#define M_DEG_TO_RAD 0.01745329251994329576f
-#define OK 0
-#define ERROR -1
+#include <stdbool.h>
+#include "mathlib/mathlib.h"
+
+static constexpr float CONSTANTS_ONE_G = 9.80665f;		/* m/s^2		*/
+static constexpr float CONSTANTS_AIR_DENSITY_SEA_LEVEL_15C = 1.225f;			/* kg/m^3		*/
+static constexpr float CONSTANTS_AIR_GAS_CONST = 287.1f; 			/* J/(kg * K)		*/
+static constexpr float CONSTANTS_ABSOLUTE_NULL_CELSIUS = -273.15f;		/* °C			*/
+static constexpr float CONSTANTS_RADIUS_OF_EARTH = 6371000;			/* meters (m)		*/
+
 // XXX remove
 struct crosstrack_error_s {
 	bool past_end;		// Flag indicating we are past the end of the line/arc segment
@@ -304,7 +299,5 @@ float _wrap_360(float bearing);
 float _wrap_pi(float bearing);
 float _wrap_2pi(float bearing);
 float get_mag_declination(float lat, float lon);
-#else
-#include <lib/geo/geo.h>
-#endif //POSIX_SHARED
+
 #endif //GEO_H

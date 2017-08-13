@@ -40,10 +40,12 @@
  *
  */
 
-#include "../ecl.h"
+#include "ecl.h"
 #include "ekf.h"
+
 #include <math.h>
-#include "mathlib.h"
+
+#include "mathlib/mathlib.h"
 
 void Ekf::initialiseCovariance()
 {

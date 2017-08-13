@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2013 Estimation and Control Library (ECL). All rights reserved.
+ *   Copyright (C) 2012 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -12,7 +12,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name APL nor the names of its contributors may be
+ * 3. Neither the name PX4 nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,49 +31,69 @@
  *
  ****************************************************************************/
 
-/**
- * @file ecl.h
- * Adapter / shim layer for system calls needed by ECL
- *
- */
+/// @file	LowPassFilter.h
+/// @brief	A class to implement a second order low pass filter
+/// Author: Leonard Hall <LeonardTHall@gmail.com>
+/// Adapted for PX4 by Andrew Tridgell
+
 #pragma once
 
-#if defined(__PX4_POSIX) || defined(__PX4_NUTTX)
+#include "ecl.h"
 
-#include <drivers/drv_hrt.h>
-#include <px4_log.h>
+namespace math
+{
+class __EXPORT LowPassFilter2p
+{
+public:
+	// constructor
+	LowPassFilter2p(float sample_freq, float cutoff_freq) :
+		_cutoff_freq(cutoff_freq),
+		_a1(0.0f),
+		_a2(0.0f),
+		_b0(0.0f),
+		_b1(0.0f),
+		_b2(0.0f),
+		_delay_element_1(0.0f),
+		_delay_element_2(0.0f)
+	{
+		// set initial parameters
+		set_cutoff_frequency(sample_freq, cutoff_freq);
+	}
 
-#define ecl_absolute_time hrt_absolute_time
-#define ecl_elapsed_time hrt_elapsed_time
-#define ECL_INFO PX4_INFO
-#define ECL_WARN PX4_WARN
-#define ECL_ERR	 PX4_ERR
+	/**
+	 * Change filter parameters
+	 */
+	void set_cutoff_frequency(float sample_freq, float cutoff_freq);
 
-#else
+	/**
+	 * Add a new raw value to the filter
+	 *
+	 * @return retrieve the filtered result
+	 */
+	float apply(float sample);
 
-#include <cstdio>
+	/**
+	 * Return the cutoff frequency
+	 */
+	float get_cutoff_freq() const
+	{
+		return _cutoff_freq;
+	}
 
-#define ECL_INFO printf
-#define ECL_WARN printf
-#define ECL_ERR printf
+	/**
+	 * Reset the filter state to this value
+	 */
+	float reset(float sample);
 
-#endif
+private:
+	float           _cutoff_freq;
+	float           _a1;
+	float           _a2;
+	float           _b0;
+	float           _b1;
+	float           _b2;
+	float           _delay_element_1;        // buffered sample -1
+	float           _delay_element_2;        // buffered sample -2
+};
 
-#ifdef __EXPORT
-#  undef __EXPORT
-#endif
-#define __EXPORT __attribute__ ((visibility ("default")))
-
-#ifndef __PX4_QURT
-#if defined(__cplusplus) && !defined(__PX4_NUTTX)
-#include <cmath>
-#define ISFINITE(x) std::isfinite(x)
-#else
-#define ISFINITE(x) isfinite(x)
-#endif
-#endif
-
-#if defined(__PX4_QURT)
-// Missing math.h defines
-#define ISFINITE(x) __builtin_isfinite(x)
-#endif
+} // namespace math

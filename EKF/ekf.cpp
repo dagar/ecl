@@ -39,24 +39,10 @@
  * @author Paul Riseborough <p_riseborough@live.com.au>
  */
 
-#include "../ecl.h"
+#include "ecl.h"
 #include "ekf.h"
-#include "mathlib.h"
 
-#ifndef __PX4_QURT
-#if defined(__cplusplus) && !defined(__PX4_NUTTX)
-#include <cmath>
-#define ISFINITE(x) std::isfinite(x)
-#else
-#define ISFINITE(x) isfinite(x)
-#endif
-#endif
-
-#if defined(__PX4_QURT)
-// Missing math.h defines
-#define ISFINITE(x) __builtin_isfinite(x)
-#endif
-
+#include "mathlib/mathlib.h"
 
 bool Ekf::init(uint64_t timestamp)
 {

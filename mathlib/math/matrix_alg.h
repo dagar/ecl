@@ -1,6 +1,7 @@
 /****************************************************************************
  *
- *   Copyright (c) 2013 Estimation and Control Library (ECL). All rights reserved.
+ *   Copyright (C) 2013 PX4 Development Team. All rights reserved.
+ *   Author: Siddharth Bharat Purohit <sibpurohit@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -12,7 +13,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name APL nor the names of its contributors may be
+ * 3. Neither the name PX4 nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -32,48 +33,18 @@
  ****************************************************************************/
 
 /**
- * @file ecl.h
- * Adapter / shim layer for system calls needed by ECL
+ * @file matrix_alg.h
  *
+ * Matrix algebra on raw arrays
  */
+
+
 #pragma once
 
-#if defined(__PX4_POSIX) || defined(__PX4_NUTTX)
+#include <inttypes.h>
+#include <string.h>
+#include <math.h>
 
-#include <drivers/drv_hrt.h>
-#include <px4_log.h>
-
-#define ecl_absolute_time hrt_absolute_time
-#define ecl_elapsed_time hrt_elapsed_time
-#define ECL_INFO PX4_INFO
-#define ECL_WARN PX4_WARN
-#define ECL_ERR	 PX4_ERR
-
-#else
-
-#include <cstdio>
-
-#define ECL_INFO printf
-#define ECL_WARN printf
-#define ECL_ERR printf
-
-#endif
-
-#ifdef __EXPORT
-#  undef __EXPORT
-#endif
-#define __EXPORT __attribute__ ((visibility ("default")))
-
-#ifndef __PX4_QURT
-#if defined(__cplusplus) && !defined(__PX4_NUTTX)
-#include <cmath>
-#define ISFINITE(x) std::isfinite(x)
-#else
-#define ISFINITE(x) isfinite(x)
-#endif
-#endif
-
-#if defined(__PX4_QURT)
-// Missing math.h defines
-#define ISFINITE(x) __builtin_isfinite(x)
-#endif
+float *mat_mul(float *A, float *B, uint8_t n);
+bool mat_inverse(float *A, float *inv, uint8_t n);
+bool inverse4x4(float m[], float invOut[]);
