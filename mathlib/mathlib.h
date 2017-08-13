@@ -41,6 +41,8 @@
 
 #ifdef __cplusplus
 
+static constexpr float M_PI_F = 3.14159265f;
+
 static constexpr float M_TWOPI_F = 6.28318530717958647692f;
 static constexpr float M_PI_2_F = 1.57079632679489661923f;
 static constexpr float M_RAD_TO_DEG = 57.29577951308232087679f;

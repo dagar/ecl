@@ -59,6 +59,11 @@
 
 #endif
 
+
+#define OK 0
+#define ERROR -1
+
+
 #ifdef __EXPORT
 #  undef __EXPORT
 #endif

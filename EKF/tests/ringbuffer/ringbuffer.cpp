@@ -41,16 +41,14 @@
 
 #include <stdint.h>
 #include <cassert>
-#include "../../RingBuffer.h"
-
-extern "C" __EXPORT int ringbuffer_main(int argc, char *argv[]);
+#include "RingBuffer.h"
 
 struct sample {
 	uint64_t time_us;
 	float data[3];
 };
 
-int ringbuffer_main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	sample x;
 	x.time_us = 1000000;

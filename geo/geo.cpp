@@ -36,17 +36,13 @@
  *
  * Geo / math functions to perform geodesic calculations
  *
- * @author Thomas Gubler <thomasgubler@student.ethz.ch>
- * @author Julian Oes <joes@student.ethz.ch>
- * @author Lorenz Meier <lm@inf.ethz.ch>
- * @author Anton Babushkin <anton.babushkin@me.com>
  */
 
-#include <stdio.h>
-#include <math.h>
-#include <stdbool.h>
-#include <string.h>
-#include <float.h>
+#include <cmath>
+#include <cfloat>
+#include <cstdint>
+
+#include "mathlib/mathlib.h"
 
 /****************************************************************************
  *
@@ -93,7 +89,6 @@
 *
 */
 
-#include <stdint.h>
 #include "geo.h"
 
 /** set this always to the sampling in degrees for the table below */

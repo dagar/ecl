@@ -16,3 +16,5 @@ set(SRC
 	)
 	
 add_library(ekf ${SRC})
+
+add_subdirectory(tests)

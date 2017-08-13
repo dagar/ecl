@@ -1,2 +1,2 @@
 
-add_library(geo geo.c)
+add_library(geo geo.cpp)

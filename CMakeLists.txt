@@ -50,6 +50,8 @@ if(NOT EXISTS "${MATRIX_DIR}/.git")
 	message(SEND_ERROR "The git submodules are not available. Please run git submodule update --init --recursive")
 endif()
 
+enable_testing()
+
 add_definitions(-DPOSIX_SHARED)
 add_definitions(-D__EXPORT)
 add_compile_options(
@@ -69,5 +71,6 @@ include_directories(${CMAKE_SOURCE_DIR}/matrix)
 add_subdirectory(mathlib)
 #add_subdirectory(attitude_fw) # needs hrt
 add_subdirectory(EKF)
+add_subdirectory(geo)
 #add_subdirectory(l1) # needs old matrix lib
 #add_subdirectory(validation) # needs hrt
