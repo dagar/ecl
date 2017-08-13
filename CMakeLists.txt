@@ -57,10 +57,10 @@ add_compile_options(
 	-std=c++11
 	-Wall
 	-Werror
-	-Wno-deprecated-declarations
-	-Wno-enum-compare
-	-Wno-unused-local-typedefs
+	-Wextra
 	-Wno-unused-parameter
+	-O3
+	#-fno-errno-math
 	)
 	
 include_directories(${CMAKE_SOURCE_DIR})

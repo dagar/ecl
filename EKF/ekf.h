@@ -53,97 +53,97 @@ public:
 	~Ekf() = default;
 
 	// initialise variables to sane values (also interface class)
-	bool init(uint64_t timestamp);
+	bool init(uint64_t timestamp) final override;
 
 	// should be called every time new data is pushed into the filter
-	bool update();
+	bool update() final override;
 
 	// gets the innovations of velocity and position measurements
 	// 0-2 vel, 3-5 pos
-	void get_vel_pos_innov(float vel_pos_innov[6]);
+	void get_vel_pos_innov(float vel_pos_innov[6]) final override;
 
 	// gets the innovations of the earth magnetic field measurements
-	void get_mag_innov(float mag_innov[3]);
+	void get_mag_innov(float mag_innov[3]) final override;
 
 	// gets the innovations of the heading measurement
-	void get_heading_innov(float *heading_innov);
+	void get_heading_innov(float *heading_innov) final override;
 
 	// gets the innovation variances of velocity and position measurements
 	// 0-2 vel, 3-5 pos
-	void get_vel_pos_innov_var(float vel_pos_innov_var[6]);
+	void get_vel_pos_innov_var(float vel_pos_innov_var[6]) final override;
 
 	// gets the innovation variances of the earth magnetic field measurements
-	void get_mag_innov_var(float mag_innov_var[3]);
+	void get_mag_innov_var(float mag_innov_var[3]) final override;
 
 	// gets the innovations of airspeed measurement
-	void get_airspeed_innov(float *airspeed_innov);
+	void get_airspeed_innov(float *airspeed_innov) final override;
 
 	// gets the innovation variance of the airspeed measurement
-	void get_airspeed_innov_var(float *airspeed_innov_var);
+	void get_airspeed_innov_var(float *airspeed_innov_var) final override;
 
 	// gets the innovations of synthetic sideslip measurement
-	void get_beta_innov(float *beta_innov);
+	void get_beta_innov(float *beta_innov) final override;
 
 	// gets the innovation variance of the synthetic sideslip measurement
-	void get_beta_innov_var(float *beta_innov_var);
+	void get_beta_innov_var(float *beta_innov_var) final override;
 
 	// gets the innovation variance of the heading measurement
-	void get_heading_innov_var(float *heading_innov_var);
+	void get_heading_innov_var(float *heading_innov_var) final override;
 
 	// gets the innovation variance of the flow measurement
-	void get_flow_innov_var(float flow_innov_var[2]);
+	void get_flow_innov_var(float flow_innov_var[2]) final override;
 
 	// gets the innovation of the flow measurement
-	void get_flow_innov(float flow_innov[2]);
+	void get_flow_innov(float flow_innov[2]) final override;
 
 	// gets the innovation variance of the drag specific force measurement
-	void get_drag_innov_var(float drag_innov_var[2]);
+	void get_drag_innov_var(float drag_innov_var[2]) final override;
 
 	// gets the innovation of the drag specific force measurement
-	void get_drag_innov(float drag_innov[2]);
+	void get_drag_innov(float drag_innov[2]) final override;
 
 	// gets the innovation variance of the HAGL measurement
-	void get_hagl_innov_var(float *hagl_innov_var);
+	void get_hagl_innov_var(float *hagl_innov_var) final override;
 
 	// gets the innovation of the HAGL measurement
-	void get_hagl_innov(float *hagl_innov);
+	void get_hagl_innov(float *hagl_innov) final override;
 
 	// get the state vector at the delayed time horizon
-	void get_state_delayed(float *state);
+	void get_state_delayed(float *state) final override;
 
 	// get the wind velocity in m/s
-	void get_wind_velocity(float *wind);
+	void get_wind_velocity(float *wind) final override;
 
 	// get the true airspeed in m/s
-	void get_true_airspeed(float *tas);
+	void get_true_airspeed(float *tas) final override;
 
 	// get the diagonal elements of the covariance matrix
-	void get_covariances(float *covariances);
+	void get_covariances(float *covariances) final override;
 
 	// ask estimator for sensor data collection decision and do any preprocessing if required, returns true if not defined
-	bool collect_gps(uint64_t time_usec, struct gps_message *gps);
-	bool collect_imu(imuSample &imu);
+	bool collect_gps(uint64_t time_usec, struct gps_message *gps) final override;
+	bool collect_imu(imuSample &imu) final override;
 
 	// get the ekf WGS-84 origin position and height and the system time it was last set
 	// return true if the origin is valid
-	bool get_ekf_origin(uint64_t *origin_time, map_projection_reference_s *origin_pos, float *origin_alt);
+	bool get_ekf_origin(uint64_t *origin_time, map_projection_reference_s *origin_pos, float *origin_alt) final override;
 
 	// get the 1-sigma horizontal and vertical position uncertainty of the ekf WGS-84 position
-	void get_ekf_gpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_reckoning);
+	void get_ekf_gpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_reckoning) final override;
 
 	// get the 1-sigma horizontal and vertical position uncertainty of the ekf local position
-	void get_ekf_lpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_reckoning);
+	void get_ekf_lpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_reckoning) final override;
 
 	// get the 1-sigma horizontal and vertical velocity uncertainty
-	void get_ekf_vel_accuracy(float *ekf_evh, float *ekf_evv, bool *dead_reckoning);
+	void get_ekf_vel_accuracy(float *ekf_evh, float *ekf_evv, bool *dead_reckoning) final override;
 
-	void get_vel_var(Vector3f &vel_var);
+	void get_vel_var(Vector3f &vel_var) final override;
 
-	void get_pos_var(Vector3f &pos_var);
+	void get_pos_var(Vector3f &pos_var) final override;
 
 	// return an array containing the output predictor angular, velocity and position tracking
 	// error magnitudes (rad), (m/sec), (m)
-	void get_output_tracking_error(float error[3]);
+	void get_output_tracking_error(float error[3]) final override;
 
 	/*
 	Returns  following IMU vibration metrics in the following array locations
@@ -151,51 +151,51 @@ public:
 	1 : Gyro high frequency vibe = filtered length of (delta_angle - prev_delta_angle)
 	2 : Accel high frequency vibe = filtered length of (delta_velocity - prev_delta_velocity)
 	*/
-	void get_imu_vibe_metrics(float vibe[3]);
+	void get_imu_vibe_metrics(float vibe[3]) final override;
 
 	// return true if the global position estimate is valid
-	bool global_position_is_valid();
+	bool global_position_is_valid() final override;
 
 	// return true if the EKF is dead reckoning the position using inertial data only
-	bool inertial_dead_reckoning();
+	bool inertial_dead_reckoning() final override;
 
 	// return true if the terrain estimate is valid
-	bool get_terrain_valid();
+	bool get_terrain_valid() final override;
 
 	// get the estimated terrain vertical position relative to the NED origin
-	void get_terrain_vert_pos(float *ret);
+	void get_terrain_vert_pos(float *ret) final override;
 
 	// get the accerometer bias in m/s/s
-	void get_accel_bias(float bias[3]);
+	void get_accel_bias(float bias[3]) final override;
 
 	// get the gyroscope bias in rad/s
-	void get_gyro_bias(float bias[3]);
+	void get_gyro_bias(float bias[3]) final override;
 
 	// get GPS check status
-	void get_gps_check_status(uint16_t *val);
+	void get_gps_check_status(uint16_t *val) final override;
 
 	// return the amount the local vertical position changed in the last reset and the number of reset events
-	void get_posD_reset(float *delta, uint8_t *counter) {*delta = _state_reset_status.posD_change; *counter = _state_reset_status.posD_counter;}
+	void get_posD_reset(float *delta, uint8_t *counter) final override {*delta = _state_reset_status.posD_change; *counter = _state_reset_status.posD_counter;}
 
 	// return the amount the local vertical velocity changed in the last reset and the number of reset events
-	void get_velD_reset(float *delta, uint8_t *counter) {*delta = _state_reset_status.velD_change; *counter = _state_reset_status.velD_counter;}
+	void get_velD_reset(float *delta, uint8_t *counter) final override {*delta = _state_reset_status.velD_change; *counter = _state_reset_status.velD_counter;}
 
 	// return the amount the local horizontal position changed in the last reset and the number of reset events
-	void get_posNE_reset(float delta[2], uint8_t *counter)
+	void get_posNE_reset(float delta[2], uint8_t *counter) final override
 	{
 		memcpy(delta, &_state_reset_status.posNE_change._data[0], sizeof(_state_reset_status.posNE_change._data));
 		*counter = _state_reset_status.posNE_counter;
 	}
 
 	// return the amount the local horizontal velocity changed in the last reset and the number of reset events
-	void get_velNE_reset(float delta[2], uint8_t *counter)
+	void get_velNE_reset(float delta[2], uint8_t *counter) final override
 	{
 		memcpy(delta, &_state_reset_status.velNE_change._data[0], sizeof(_state_reset_status.velNE_change._data));
 		*counter = _state_reset_status.velNE_counter;
 	}
 
 	// return the amount the quaternion has changed in the last reset and the number of reset events
-	void get_quat_reset(float delta_quat[4], uint8_t *counter)
+	void get_quat_reset(float delta_quat[4], uint8_t *counter) final override
 	{
 		memcpy(delta_quat, &_state_reset_status.quat_change._data[0], sizeof(_state_reset_status.quat_change._data));
 		*counter = _state_reset_status.quat_counter;
@@ -206,10 +206,10 @@ public:
 	// Innovation Test Ratios - these are the ratio of the innovation to the acceptance threshold.
 	// A value > 1 indicates that the sensor measurement has exceeded the maximum acceptable level and has been rejected by the EKF
 	// Where a measurement type is a vector quantity, eg magnetoemter, GPS position, etc, the maximum value is returned.
-	void get_innovation_test_status(uint16_t *status, float *mag, float *vel, float *pos, float *hgt, float *tas, float *hagl);
+	void get_innovation_test_status(uint16_t *status, float *mag, float *vel, float *pos, float *hgt, float *tas, float *hagl) final override;
 
 	// return a bitmask integer that describes which state estimates can be used for flight control
-	void get_ekf_soln_status(uint16_t *status);
+	void get_ekf_soln_status(uint16_t *status) final override;
 
 private:
 
