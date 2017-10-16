@@ -31,34 +31,13 @@
 #
 ############################################################################
 
-px4_add_module(
-	MODULE lib__ecl
-	STACK_MAIN 6000
-	STACK_MAX 6000
-	COMPILE_FLAGS
-	SRCS
-		attitude_fw/ecl_controller.cpp
-		attitude_fw/ecl_pitch_controller.cpp
-		attitude_fw/ecl_roll_controller.cpp
-		attitude_fw/ecl_wheel_controller.cpp
-		attitude_fw/ecl_yaw_controller.cpp
-		EKF/airspeed_fusion.cpp
-		EKF/control.cpp
-		EKF/covariance.cpp
-		EKF/ekf.cpp
-		EKF/ekf_helper.cpp
-		EKF/estimator_interface.cpp
-		EKF/gps_checks.cpp
-		EKF/mag_fusion.cpp
-		EKF/optflow_fusion.cpp
-		EKF/sideslip_fusion.cpp
-		EKF/terrain_estimator.cpp
-		EKF/vel_pos_fusion.cpp
-		EKF/drag_fusion.cpp
-		l1/ecl_l1_pos_controller.cpp
-		validation/data_validator.cpp
-		validation/data_validator_group.cpp
-	DEPENDS
-		platforms__common
-	)
-# vim: set noet ft=cmake fenc=utf-8 ff=unix :
+cmake_minimum_required(VERSION 3.0)
+
+project(ECL CXX)
+
+add_subdirectory(attitude_fw)
+add_subdirectory(EKF)
+add_subdirectory(geo)
+add_subdirectory(geo_lookup)
+add_subdirectory(l1)
+add_subdirectory(validation)

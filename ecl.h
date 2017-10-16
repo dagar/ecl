@@ -41,7 +41,7 @@
 #if defined(__PX4_POSIX) || defined(__PX4_NUTTX)
 
 #include <drivers/drv_hrt.h>
-#include <px4_log.h>
+#include <log/px4_log.h>
 
 #define ecl_absolute_time hrt_absolute_time
 #define ecl_elapsed_time hrt_elapsed_time

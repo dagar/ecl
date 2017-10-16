@@ -42,7 +42,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <float.h>
-#include <geo/geo.h>
+#include <geo.h>
 #include <ecl/ecl.h>
 #include <mathlib/mathlib.h>
 #include <systemlib/err.h>

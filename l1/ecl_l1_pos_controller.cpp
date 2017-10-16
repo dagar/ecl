@@ -42,6 +42,8 @@
 
 #include "ecl_l1_pos_controller.h"
 
+#include <geo.h>
+
 float ECL_L1_Pos_Controller::nav_roll()
 {
 	float ret = atanf(_lateral_accel * 1.0f / CONSTANTS_ONE_G);

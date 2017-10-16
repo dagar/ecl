@@ -61,8 +61,6 @@
 #define ECL_L1_POS_CONTROLLER_H
 
 #include <mathlib/mathlib.h>
-#include <geo/geo.h>
-#include <ecl/ecl.h>
 
 /**
  * L1 Nonlinear Guidance Logic
