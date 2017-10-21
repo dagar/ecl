@@ -35,7 +35,6 @@
 #include "tecs.h"
 
 #include <ecl/ecl.h>
-#include <systemlib/err.h>
 #include <geo/geo.h>
 
 using math::constrain;
@@ -574,7 +573,7 @@ void TECS::_update_STE_rate_lim()
 }
 
 void TECS::update_pitch_throttle(const math::Matrix<3, 3> &rotMat, float pitch, float baro_altitude, float hgt_setpoint,
-				 float EAS_setpoint, float indicated_airspeed, float EAS2TAS, bool climb_out_setpoint, float pitch_min_climbout,
+				 float EAS_setpoint, float indicated_airspeed, float eas_to_tas, bool climb_out_setpoint, float pitch_min_climbout,
 				 float throttle_min, float throttle_max, float throttle_cruise, float pitch_limit_min, float pitch_limit_max)
 {
 
@@ -590,7 +589,7 @@ void TECS::update_pitch_throttle(const math::Matrix<3, 3> &rotMat, float pitch, 
 	_climbout_mode_active = climb_out_setpoint;
 
 	// Initialize selected states and variables as required
-	_initialize_states(pitch, throttle_cruise, baro_altitude, pitch_min_climbout, EAS2TAS);
+	_initialize_states(pitch, throttle_cruise, baro_altitude, pitch_min_climbout, eas_to_tas);
 
 	// Don't run TECS control agorithms when not in flight
 	if (!_in_air) {
@@ -598,7 +597,7 @@ void TECS::update_pitch_throttle(const math::Matrix<3, 3> &rotMat, float pitch, 
 	}
 
 	// Update the true airspeed state estimate
-	_update_speed_states(EAS_setpoint, indicated_airspeed, EAS2TAS);
+	_update_speed_states(EAS_setpoint, indicated_airspeed, eas_to_tas);
 
 	// Calculate rate limits for specific total energy
 	_update_STE_rate_lim();

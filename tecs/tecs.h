@@ -158,7 +158,7 @@ public:
 	 */
 	void update_pitch_throttle(const math::Matrix<3, 3> &rotMat, float pitch, float baro_altitude, float hgt_setpoint,
 				   float EAS_setpoint, float indicated_airspeed, float eas_to_tas, bool climb_out_setpoint, float pitch_min_climbout,
-				   float throttle_min, float _throttle_setpoint_max, float throttle_cruise,
+				   float throttle_min, float throttle_max, float throttle_cruise,
 				   float pitch_limit_min, float pitch_limit_max);
 
 	float get_throttle_setpoint(void) { return _throttle_setpoint; }
@@ -438,7 +438,7 @@ private:
 	/**
 	 * Update the airspeed internal state using a second order complementary filter
 	 */
-	void _update_speed_states(float airspeed_setpoint, float indicated_airspeed, float eas_to_tas);
+	void _update_speed_states(float airspeed_setpoint, float indicated_airspeed, float EAS2TAS);
 
 	/**
 	 * Update the desired airspeed
@@ -478,7 +478,7 @@ private:
 	/**
 	 * Initialize the controller
 	 */
-	void _initialize_states(float pitch, float throttle_cruise, float baro_altitude, float min_pitch, float eas_to_tas);
+	void _initialize_states(float pitch, float throttle_cruise, float baro_altitude, float pitch_min_climbout, float EAS2TAS);
 
 	/**
 	 * Calculate specific total energy rate limits
