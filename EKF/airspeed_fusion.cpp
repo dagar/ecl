@@ -151,8 +151,7 @@ void Ekf::fuseAirspeed()
 
 
 		// Calculate measurement innovation
-		_airspeed_innov = v_tas_pred -
-				  _airspeed_sample_delayed.true_airspeed;
+		_airspeed_innov = v_tas_pred - _airspeed_sample_delayed.true_airspeed;
 
 		// Calculate the innovation variance
 		_airspeed_innov_var = 1.0f / SK_TAS[0];

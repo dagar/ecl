@@ -148,9 +148,6 @@ void Ekf::predictCovariance()
 
 	float dt = math::constrain(_imu_sample_delayed.delta_ang_dt, 0.0005f * FILTER_UPDATE_PERIOD_MS, 0.002f * FILTER_UPDATE_PERIOD_MS);
 
-	// compute noise variance for stationary processes
-	float process_noise[_k_num_states] = {};
-
 	// convert rate of change of rate gyro bias (rad/s**2) as specified by the parameter to an expected change in delta angle (rad) since the last update
 	float d_ang_bias_sig = dt * dt * math::constrain(_params.gyro_bias_p_noise, 0.0f, 1.0f);
 
@@ -216,9 +213,10 @@ void Ekf::predictCovariance()
 
 	// Construct the process noise variance diagonal for those states with a stationary process model
 	// These are kinematic states and their error growth is controlled separately by the IMU noise variances
-	for (unsigned i = 0; i <= 9; i++) {
-		process_noise[i] = 0.0f;
-	}
+
+	// compute noise variance for stationary processes
+	float process_noise[_k_num_states] = {};
+
 	// delta angle bias states
 	process_noise[12] = process_noise[11] = process_noise[10] = sq(d_ang_bias_sig);
 	// delta_velocity bias states
@@ -293,7 +291,7 @@ void Ekf::predictCovariance()
 	SQ[9] = sq(SG[0]);
 	SQ[10] = sq(q1);
 
-	float SPP[11] = {};
+	float SPP[11];
 	SPP[0] = SF[12] + SF[13] - 2*q2*SF[2];
 	SPP[1] = SF[17] - SF[18] - SF[19] + SF[20];
 	SPP[2] = SF[17] - SF[18] + SF[19] - SF[20];
@@ -691,7 +689,7 @@ void Ekf::fixCovarianceErrors()
 	// and set corresponding entries in Q to zero when states exceed 50% of the limit
 	// Covariance diagonal limits. Use same values for states which
 	// belong to the same group (e.g. vel_x, vel_y, vel_z)
-	float P_lim[8] = {};
+	float P_lim[8];
 	P_lim[0] = 1.0f;		// quaternion max var
 	P_lim[1] = 1e6f;		// velocity max var
 	P_lim[2] = 1e6f;		// positiion max var

@@ -45,6 +45,7 @@ px4_add_module(
 		EKF/airspeed_fusion.cpp
 		EKF/control.cpp
 		EKF/covariance.cpp
+		EKF/drag_fusion.cpp
 		EKF/ekf.cpp
 		EKF/ekf_helper.cpp
 		EKF/estimator_interface.cpp
@@ -54,7 +55,6 @@ px4_add_module(
 		EKF/sideslip_fusion.cpp
 		EKF/terrain_estimator.cpp
 		EKF/vel_pos_fusion.cpp
-		EKF/drag_fusion.cpp
 		l1/ecl_l1_pos_controller.cpp
 		tecs/tecs.cpp
 		validation/data_validator.cpp
@@ -62,4 +62,10 @@ px4_add_module(
 	DEPENDS
 		platforms__common
 	)
-# vim: set noet ft=cmake fenc=utf-8 ff=unix :
+
+set_source_files_properties(EKF/control.cpp PROPERTIES COMPILE_FLAGS -O2)
+set_source_files_properties(EKF/covariance.cpp PROPERTIES COMPILE_FLAGS -O2)
+set_source_files_properties(EKF/ekf.cpp PROPERTIES COMPILE_FLAGS -O2)
+set_source_files_properties(EKF/ekf_helper.cpp PROPERTIES COMPILE_FLAGS -O2)
+set_source_files_properties(EKF/estimator_interface.cpp PROPERTIES COMPILE_FLAGS -O2)
+

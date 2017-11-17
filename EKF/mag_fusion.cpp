@@ -797,7 +797,7 @@ void Ekf::fuseDeclination()
 	H_DECL[17] = magN*t21;
 
 	// Calculate the Kalman gains
-	float Kfusion[_k_num_states] = {};
+	float Kfusion[_k_num_states];
 	Kfusion[0] = -t4*t13*(P[0][16]*magE-P[0][17]*magN);
 	Kfusion[1] = -t4*t13*(P[1][16]*magE-P[1][17]*magN);
 	Kfusion[2] = -t4*t13*(P[2][16]*magE-P[2][17]*magN);

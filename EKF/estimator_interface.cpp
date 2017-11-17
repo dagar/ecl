@@ -47,8 +47,7 @@
 #include "mathlib.h"
 
 // Accumulate imu data and store to buffer at desired rate
-void EstimatorInterface::setIMUData(uint64_t time_usec, uint64_t delta_ang_dt, uint64_t delta_vel_dt,
-				    float (&delta_ang)[3], float (&delta_vel)[3])
+void EstimatorInterface::setIMUData(const uint64_t& time_usec, const uint64_t& delta_ang_dt, const uint64_t& delta_vel_dt, const float (&delta_ang)[3], const float (&delta_vel)[3])
 {
 	if (!_initialised) {
 		init(time_usec);
@@ -154,7 +153,7 @@ void EstimatorInterface::setIMUData(uint64_t time_usec, uint64_t delta_ang_dt, u
 	}
 }
 
-void EstimatorInterface::setMagData(uint64_t time_usec, float (&data)[3])
+void EstimatorInterface::setMagData(const uint64_t& time_usec, const float (&data)[3])
 {
 	if (!_initialised || _mag_buffer_fail) {
 		return;
@@ -185,7 +184,7 @@ void EstimatorInterface::setMagData(uint64_t time_usec, float (&data)[3])
 	}
 }
 
-void EstimatorInterface::setGpsData(uint64_t time_usec, struct gps_message *gps)
+void EstimatorInterface::setGpsData(const uint64_t& time_usec, struct gps_message *gps)
 {
 	if (!_initialised || _gps_buffer_fail) {
 		return;
@@ -238,7 +237,7 @@ void EstimatorInterface::setGpsData(uint64_t time_usec, struct gps_message *gps)
 	}
 }
 
-void EstimatorInterface::setBaroData(uint64_t time_usec, float data)
+void EstimatorInterface::setBaroData(const uint64_t& time_usec, const float& data)
 {
 	if (!_initialised || _baro_buffer_fail) {
 		return;
@@ -270,7 +269,7 @@ void EstimatorInterface::setBaroData(uint64_t time_usec, float data)
 	}
 }
 
-void EstimatorInterface::setAirspeedData(uint64_t time_usec, float true_airspeed, float eas2tas)
+void EstimatorInterface::setAirspeedData(const uint64_t& time_usec, const float true_airspeed, const float eas2tas)
 {
 	if (!_initialised || _airspeed_buffer_fail) {
 		return;
@@ -299,7 +298,7 @@ void EstimatorInterface::setAirspeedData(uint64_t time_usec, float true_airspeed
 	}
 }
 
-void EstimatorInterface::setRangeData(uint64_t time_usec, float data)
+void EstimatorInterface::setRangeData(const uint64_t& time_usec, const float data)
 {
 	if (!_initialised || _range_buffer_fail) {
 		return;
@@ -327,7 +326,7 @@ void EstimatorInterface::setRangeData(uint64_t time_usec, float data)
 }
 
 // set optical flow data
-void EstimatorInterface::setOpticalFlowData(uint64_t time_usec, flow_message *flow)
+void EstimatorInterface::setOpticalFlowData(const uint64_t& time_usec, flow_message *flow)
 {
 	if (!_initialised || _flow_buffer_fail) {
 		return;
@@ -406,7 +405,7 @@ void EstimatorInterface::setOpticalFlowData(uint64_t time_usec, flow_message *fl
 }
 
 // set attitude and position data derived from an external vision system
-void EstimatorInterface::setExtVisionData(uint64_t time_usec, ext_vision_message *evdata)
+void EstimatorInterface::setExtVisionData(const uint64_t& time_usec, ext_vision_message *evdata)
 {
 	if (!_initialised || _ev_buffer_fail) {
 		return;
@@ -512,12 +511,6 @@ void EstimatorInterface::unallocate_buffers()
 	_output_vert_buffer.unallocate();
 	_drag_buffer.unallocate();
 
-}
-
-bool EstimatorInterface::local_position_is_valid()
-{
-	// return true if we are not doing unconstrained free inertial navigation
-	return !inertial_dead_reckoning();
 }
 
 void EstimatorInterface::print_status() {

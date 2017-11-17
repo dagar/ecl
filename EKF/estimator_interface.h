@@ -162,35 +162,35 @@ public:
 	virtual bool collect_imu(imuSample &imu) { return true; }
 
 	// set delta angle imu data
-	void setIMUData(uint64_t time_usec, uint64_t delta_ang_dt, uint64_t delta_vel_dt, float (&delta_ang)[3], float (&delta_vel)[3]);
+	void setIMUData(const uint64_t& time_usec, const uint64_t& delta_ang_dt, const uint64_t& delta_vel_dt, const float (&delta_ang)[3], const float (&delta_vel)[3]);
 
 	// set magnetometer data
-	void setMagData(uint64_t time_usec, float (&data)[3]);
+	void setMagData(const uint64_t& time_usec, const float (&data)[3]);
 
 	// set gps data
-	void setGpsData(uint64_t time_usec, struct gps_message *gps);
+	void setGpsData(const uint64_t& time_usec, struct gps_message *gps);
 
 	// set baro data
-	void setBaroData(uint64_t time_usec, float data);
+	void setBaroData(const uint64_t& time_usec, const float& data);
 
 	// set airspeed data
-	void setAirspeedData(uint64_t time_usec, float true_airspeed, float eas2tas);
+	void setAirspeedData(const uint64_t& time_usec, const float true_airspeed, const float eas2tas);
 
 	// set range data
-	void setRangeData(uint64_t time_usec, float data);
+	void setRangeData(const uint64_t& time_usec, const float data);
 
 	// set optical flow data
-	void setOpticalFlowData(uint64_t time_usec, flow_message *flow);
+	void setOpticalFlowData(const uint64_t& time_usec, flow_message *flow);
 
 	// set external vision position and attitude data
-	void setExtVisionData(uint64_t time_usec, ext_vision_message *evdata);
+	void setExtVisionData(const uint64_t& time_usec, ext_vision_message *evdata);
 
 	// return a address to the parameters struct
 	// in order to give access to the application
-	parameters *getParamHandle() {return &_params;}
+	parameters *getParamHandle() { return &_params; }
 
 	// set vehicle landed status data
-	void set_in_air_status(bool in_air) {_control_status.flags.in_air = in_air;}
+	void set_in_air_status(bool in_air) { _control_status.flags.in_air = in_air; }
 
 	/*
 	Reset all IMU bias states and covariances to initial alignment values.
@@ -200,19 +200,19 @@ public:
 	virtual bool reset_imu_bias() = 0;
 
 	// get vehicle landed status data
-	bool get_in_air_status() {return _control_status.flags.in_air;}
+	bool get_in_air_status() { return _control_status.flags.in_air; }
 
 	// set vehicle is fixed wing status
-	void set_is_fixed_wing(bool is_fixed_wing) {_control_status.flags.fixed_wing = is_fixed_wing;}
+	void set_is_fixed_wing(bool is_fixed_wing) { _control_status.flags.fixed_wing = is_fixed_wing; }
 
 	// set flag if synthetic sideslip measurement should be fused
-	void set_fuse_beta_flag(bool fuse_beta) {_control_status.flags.fuse_beta = (fuse_beta && _control_status.flags.in_air);}
+	void set_fuse_beta_flag(bool fuse_beta) { _control_status.flags.fuse_beta = (fuse_beta && _control_status.flags.in_air); }
 
 	// set flag if only only mag states should be updated by the magnetometer
-	void set_update_mag_states_only_flag(bool update_mag_states_only) {_control_status.flags.update_mag_states_only = update_mag_states_only;}
+	void set_update_mag_states_only_flag(bool update_mag_states_only) { _control_status.flags.update_mag_states_only = update_mag_states_only; }
 
 	// set air density used by the multi-rotor specific drag force fusion
-	void set_air_density(float air_density) {_air_density = air_density;}
+	void set_air_density(float air_density) { _air_density = air_density; }
 
 	// return true if the global position estimate is valid
 	virtual bool global_position_is_valid() = 0;
@@ -227,14 +227,9 @@ public:
 	virtual void get_terrain_vert_pos(float *ret) = 0;
 
 	// return true if the local position estimate is valid
-	bool local_position_is_valid();
+	bool local_position_is_valid() { return !inertial_dead_reckoning(); }
 
-	void copy_quaternion(float *quat)
-	{
-		for (unsigned i = 0; i < 4; i++) {
-			quat[i] = _output_new.quat_nominal(i);
-		}
-	}
+	void copy_quaternion(float *quat) { memcpy(quat, _output_new.quat_nominal.data(), 4 * sizeof(float)); }
 
 	// return the quaternion defining the rotation from the EKF to the External Vision reference frame
 	virtual void get_ekf2ev_quaternion(float *quat) = 0;
@@ -242,26 +237,17 @@ public:
 	// get the velocity of the body frame origin in local NED earth frame
 	void get_velocity(float *vel)
 	{
-		Vector3f vel_earth = _output_new.vel - _vel_imu_rel_body_ned;
+		const Vector3f vel_earth = _output_new.vel - _vel_imu_rel_body_ned;
 		for (unsigned i = 0; i < 3; i++) {
 			vel[i] = vel_earth(i);
 		}
 	}
 
 	// get the NED velocity derivative in earth frame
-	void get_vel_deriv_ned(float *vel_deriv)
-	{
-		for (unsigned i = 0; i < 3; i++) {
-			vel_deriv[i] = _vel_deriv_ned(i);
-		}
-	}
+	void get_vel_deriv_ned(float *vel_deriv) { memcpy(vel_deriv, &_vel_deriv_ned, 3 * sizeof(float)); }
 
 	// get the derivative of the vertical position of the body frame origin in local NED earth frame
-	void get_pos_d_deriv(float *pos_d_deriv)
-	{
-		float var = _output_vert_new.vel_d - _vel_imu_rel_body_ned(2);
-		*pos_d_deriv = var;
-	}
+	void get_pos_d_deriv(float *pos_d_deriv) { *pos_d_deriv = _output_vert_new.vel_d - _vel_imu_rel_body_ned(2); }
 
 	// get the position of the body frame origin in local NED earth frame
 	void get_position(float *pos)
@@ -274,31 +260,20 @@ public:
 			pos[i] = _output_new.pos(i) - pos_offset_earth(i);
 		}
 	}
-	void copy_timestamp(uint64_t *time_us)
-	{
-		*time_us = _time_last_imu;
-	}
+
+	void copy_timestamp(uint64_t *time_us) { *time_us = _time_last_imu; }
 
 	// Copy the magnetic declination that we wish to save to the EKF2_MAG_DECL parameter for the next startup
-	void copy_mag_decl_deg(float *val)
-	{
-		*val = _mag_declination_to_save_deg;
-	}
+	void copy_mag_decl_deg(float *val) { *val = _mag_declination_to_save_deg; }
 
 	virtual void get_accel_bias(float bias[3]) = 0;
 	virtual void get_gyro_bias(float bias[3]) = 0;
 
 	// get EKF mode status
-	void get_control_mode(uint32_t *val)
-	{
-		*val = _control_status.value;
-	}
+	void get_control_mode(uint32_t *val) { *val = _control_status.value; }
 
 	// get EKF internal fault status
-	void get_filter_fault_status(uint16_t *val)
-	{
-		*val = _fault_status.value;
-	}
+	void get_filter_fault_status(uint16_t *val) { *val = _fault_status.value; }
 
 	// get GPS check status
 	virtual void get_gps_check_status(uint16_t *val) = 0;
@@ -329,28 +304,16 @@ public:
 	virtual void get_ekf_soln_status(uint16_t *status) = 0;
 
 	// Getter for the average imu update period in s
-	float get_dt_imu_avg()
-	{
-		return _dt_imu_avg;
-	}
+	float get_dt_imu_avg() { return _dt_imu_avg; }
 
 	// Getter for the imu sample on the delayed time horizon
-	imuSample get_imu_sample_delayed()
-	{
-		return _imu_sample_delayed;
-	}
+	imuSample get_imu_sample_delayed() { return _imu_sample_delayed; }
 
 	// Getter for the baro sample on the delayed time horizon
-	baroSample get_baro_sample_delayed()
-	{
-		return _baro_sample_delayed;
-	}
+	baroSample get_baro_sample_delayed() { return _baro_sample_delayed; }
 
 	// Getter for a flag indicating if the ekf should update (completed downsampling process)
-	bool get_imu_updated()
-	{
-		return _imu_updated;
-	}
+	bool get_imu_updated() { return _imu_updated; }
 
 	void print_status();
 

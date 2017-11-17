@@ -694,18 +694,6 @@ void Ekf::calcMagDeclination()
 	}
 }
 
-// This function forces the covariance matrix to be symmetric
-void Ekf::makeSymmetrical(float (&cov_mat)[_k_num_states][_k_num_states], uint8_t first, uint8_t last)
-{
-	for (unsigned row = first; row <= last; row++) {
-		for (unsigned column = 0; column < row; column++) {
-			float tmp = (cov_mat[row][column] + cov_mat[column][row]) / 2;
-			cov_mat[row][column] = tmp;
-			cov_mat[column][row] = tmp;
-		}
-	}
-}
-
 void Ekf::constrainStates()
 {
 	for (int i = 0; i < 4; i++) {
@@ -749,74 +737,6 @@ void Ekf::calcEarthRateNED(Vector3f &omega, double lat_rad) const
 	omega(2) = -_k_earth_rate * sinf((float)lat_rad);
 }
 
-// gets the innovations of velocity and position measurements
-// 0-2 vel, 3-5 pos
-void Ekf::get_vel_pos_innov(float vel_pos_innov[6])
-{
-	memcpy(vel_pos_innov, _vel_pos_innov, sizeof(float) * 6);
-}
-
-// writes the innovations of the earth magnetic field measurements
-void Ekf::get_mag_innov(float mag_innov[3])
-{
-	memcpy(mag_innov, _mag_innov, 3 * sizeof(float));
-}
-
-// gets the innovations of the airspeed measnurement
-void Ekf::get_airspeed_innov(float *airspeed_innov)
-{
-	memcpy(airspeed_innov, &_airspeed_innov, sizeof(float));
-}
-
-// gets the innovations of the synthetic sideslip measurements
-void Ekf::get_beta_innov(float *beta_innov)
-{
-	memcpy(beta_innov, &_beta_innov, sizeof(float));
-}
-
-// gets the innovations of the heading measurement
-void Ekf::get_heading_innov(float *heading_innov)
-{
-	memcpy(heading_innov, &_heading_innov, sizeof(float));
-}
-
-// gets the innovation variances of velocity and position measurements
-// 0-2 vel, 3-5 pos
-void Ekf::get_vel_pos_innov_var(float vel_pos_innov_var[6])
-{
-	memcpy(vel_pos_innov_var, _vel_pos_innov_var, sizeof(float) * 6);
-}
-
-// gets the innovation variances of the earth magnetic field measurements
-void Ekf::get_mag_innov_var(float mag_innov_var[3])
-{
-	memcpy(mag_innov_var, _mag_innov_var, sizeof(float) * 3);
-}
-
-// gest the innovation variance of the airspeed measurement
-void Ekf::get_airspeed_innov_var(float *airspeed_innov_var)
-{
-	memcpy(airspeed_innov_var, &_airspeed_innov_var, sizeof(float));
-}
-
-// gets the innovation variance of the synthetic sideslip measurement
-void Ekf::get_beta_innov_var(float *beta_innov_var)
-{
-	memcpy(beta_innov_var, &_beta_innov_var, sizeof(float));
-}
-
-// gets the innovation variance of the heading measurement
-void Ekf::get_heading_innov_var(float *heading_innov_var)
-{
-	memcpy(heading_innov_var, &_heading_innov_var, sizeof(float));
-}
-
-// get GPS check status
-void Ekf::get_gps_check_status(uint16_t *val)
-{
-	*val = _gps_check_fail_status.value;
-}
-
 // get the state vector at the delayed time horizon
 void Ekf::get_state_delayed(float *state)
 {
@@ -856,21 +776,17 @@ void Ekf::get_state_delayed(float *state)
 // get the accelerometer bias
 void Ekf::get_accel_bias(float bias[3])
 {
-	float temp[3];
-	temp[0] = _state.accel_bias(0) / _dt_ekf_avg;
-	temp[1] = _state.accel_bias(1) / _dt_ekf_avg;
-	temp[2] = _state.accel_bias(2) / _dt_ekf_avg;
-	memcpy(bias, temp, 3 * sizeof(float));
+	bias[0] = _state.accel_bias(0) / _dt_ekf_avg;
+	bias[1] = _state.accel_bias(1) / _dt_ekf_avg;
+	bias[2] = _state.accel_bias(2) / _dt_ekf_avg;
 }
 
 // get the gyroscope bias in rad/s
 void Ekf::get_gyro_bias(float bias[3])
 {
-	float temp[3];
-	temp[0] = _state.gyro_bias(0) / _dt_ekf_avg;
-	temp[1] = _state.gyro_bias(1) / _dt_ekf_avg;
-	temp[2] = _state.gyro_bias(2) / _dt_ekf_avg;
-	memcpy(bias, temp, 3 * sizeof(float));
+	bias[0] = _state.gyro_bias(0) / _dt_ekf_avg;
+	bias[1] = _state.gyro_bias(1) / _dt_ekf_avg;
+	bias[2] = _state.gyro_bias(2) / _dt_ekf_avg;
 }
 
 // get the diagonal elements of the covariance matrix
@@ -885,28 +801,11 @@ void Ekf::get_covariances(float *covariances)
 // return true if the origin is valid
 bool Ekf::get_ekf_origin(uint64_t *origin_time, map_projection_reference_s *origin_pos, float *origin_alt)
 {
-	memcpy(origin_time, &_last_gps_origin_time_us, sizeof(uint64_t));
-	memcpy(origin_pos, &_pos_ref, sizeof(map_projection_reference_s));
-	memcpy(origin_alt, &_gps_alt_ref, sizeof(float));
+	*origin_time = _last_gps_origin_time_us;
+	*origin_pos = _pos_ref;
+	*origin_alt = _gps_alt_ref;
+
 	return _NED_origin_initialised;
-}
-
-// return an array containing the output predictor angular, velocity and position tracking
-// error magnitudes (rad), (m/s), (m)
-void Ekf::get_output_tracking_error(float error[3])
-{
-	memcpy(error, _output_tracking_error, 3 * sizeof(float));
-}
-
-/*
-Returns  following IMU vibration metrics in the following array locations
-0 : Gyro delta angle coning metric = filtered length of (delta_angle x prev_delta_angle)
-1 : Gyro high frequency vibe = filtered length of (delta_angle - prev_delta_angle)
-2 : Accel high frequency vibe = filtered length of (delta_velocity - prev_delta_velocity)
-*/
-void Ekf::get_imu_vibe_metrics(float vibe[3])
-{
-	memcpy(vibe, _vibe_metrics, 3 * sizeof(float));
 }
 
 // get the 1-sigma horizontal and vertical position uncertainty of the ekf WGS-84 position
@@ -1110,7 +1009,7 @@ void Ekf::get_innovation_test_status(uint16_t *status, float *mag, float *vel, f
 // return a bitmask integer that describes which state estimates are valid
 void Ekf::get_ekf_soln_status(uint16_t *status)
 {
-	ekf_solution_status soln_status{};
+	ekf_solution_status soln_status;
 	soln_status.flags.attitude = _control_status.flags.tilt_align && _control_status.flags.yaw_align && (_fault_status.value == 0);
 	soln_status.flags.velocity_horiz = (_control_status.flags.gps || _control_status.flags.ev_pos || _control_status.flags.opt_flow || (_control_status.flags.fuse_beta && _control_status.flags.fuse_aspd)) && (_fault_status.value == 0);
 	soln_status.flags.velocity_vert = (_control_status.flags.baro_hgt || _control_status.flags.ev_hgt || _control_status.flags.gps_hgt || _control_status.flags.rng_hgt) && (_fault_status.value == 0);
@@ -1126,6 +1025,7 @@ void Ekf::get_ekf_soln_status(uint16_t *status)
 	bool mag_innov_good = (_mag_test_ratio[0] < 1.0f) && (_mag_test_ratio[1] < 1.0f) && (_mag_test_ratio[2] < 1.0f) && (_yaw_test_ratio < 1.0f);
 	soln_status.flags.gps_glitch = (gps_vel_innov_bad || gps_pos_innov_bad) && mag_innov_good;
 	soln_status.flags.accel_error = _bad_vert_accel_detected;
+
 	*status = soln_status.value;
 }
 
@@ -1167,26 +1067,6 @@ void Ekf::fuse(float *K, float innovation)
 	}
 }
 
-// zero specified range of rows in the state covariance matrix
-void Ekf::zeroRows(float (&cov_mat)[_k_num_states][_k_num_states], uint8_t first, uint8_t last)
-{
-	uint8_t row;
-
-	for (row = first; row <= last; row++) {
-		memset(&cov_mat[row][0], 0, sizeof(cov_mat[0][0]) * 24);
-	}
-}
-
-// zero specified range of columns in the state covariance matrix
-void Ekf::zeroCols(float (&cov_mat)[_k_num_states][_k_num_states], uint8_t first, uint8_t last)
-{
-	uint8_t row;
-
-	for (row = 0; row <= 23; row++) {
-		memset(&cov_mat[row][first], 0, sizeof(cov_mat[0][0]) * (1 + last - first));
-	}
-}
-
 void Ekf::zeroOffDiag(float (&cov_mat)[_k_num_states][_k_num_states], uint8_t first, uint8_t last)
 {
 	// save diagonal elements
@@ -1217,13 +1097,6 @@ void Ekf::setDiag(float (&cov_mat)[_k_num_states][_k_num_states], uint8_t first,
 	for (row = first; row <= last; row++) {
 		cov_mat[row][row] = variance;
 	}
-
-}
-
-bool Ekf::global_position_is_valid()
-{
-	// return true if we are not doing unconstrained free inertial navigation and the origin is set
-	return (_NED_origin_initialised && !inertial_dead_reckoning());
 }
 
 // return true if we are totally reliant on inertial dead-reckoning for position
@@ -1242,11 +1115,11 @@ bool Ekf::inertial_dead_reckoning()
 // perform a vector cross product
 Vector3f EstimatorInterface::cross_product(const Vector3f &vecIn1, const Vector3f &vecIn2)
 {
-	Vector3f vecOut;
-	vecOut(0) = vecIn1(1) * vecIn2(2) - vecIn1(2) * vecIn2(1);
-	vecOut(1) = vecIn1(2) * vecIn2(0) - vecIn1(0) * vecIn2(2);
-	vecOut(2) = vecIn1(0) * vecIn2(1) - vecIn1(1) * vecIn2(0);
-	return vecOut;
+	return Vector3f{
+		vecIn1(1) * vecIn2(2) - vecIn1(2) * vecIn2(1),
+		vecIn1(2) * vecIn2(0) - vecIn1(0) * vecIn2(2),
+		vecIn1(0) * vecIn2(1) - vecIn1(1) * vecIn2(0)
+	};
 }
 
 // calculate the inverse rotation matrix from a quaternion rotation
