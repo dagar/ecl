@@ -58,38 +58,38 @@ public:
 
 	// gets the innovations of velocity and position measurements
 	// 0-2 vel, 3-5 pos
-	void get_vel_pos_innov(float vel_pos_innov[6]);
+	void get_vel_pos_innov(float vel_pos_innov[6]) { memcpy(vel_pos_innov, _vel_pos_innov, sizeof(float) * 6); }
 
 	// gets the innovations for of the NE auxiliary velocity measurement
-	void get_aux_vel_innov(float aux_vel_innov[2]);
+	void get_aux_vel_innov(float aux_vel_innov[2]) { memcpy(aux_vel_innov, _aux_vel_innov, sizeof(float) * 2); }
 
 	// gets the innovations of the earth magnetic field measurements
-	void get_mag_innov(float mag_innov[3]);
+	void get_mag_innov(float mag_innov[3]) { memcpy(mag_innov, _mag_innov, 3 * sizeof(float)); }
 
 	// gets the innovations of the heading measurement
-	void get_heading_innov(float *heading_innov);
+	void get_heading_innov(float *heading_innov) { *heading_innov = _heading_innov; }
 
 	// gets the innovation variances of velocity and position measurements
 	// 0-2 vel, 3-5 pos
-	void get_vel_pos_innov_var(float vel_pos_innov_var[6]);
+	void get_vel_pos_innov_var(float vel_pos_innov_var[6]) { memcpy(vel_pos_innov_var, _vel_pos_innov_var, sizeof(float) * 6); }
 
 	// gets the innovation variances of the earth magnetic field measurements
-	void get_mag_innov_var(float mag_innov_var[3]);
+	void get_mag_innov_var(float mag_innov_var[3]) { memcpy(mag_innov_var, _mag_innov_var, sizeof(float) * 3); }
 
 	// gets the innovations of airspeed measurement
-	void get_airspeed_innov(float *airspeed_innov);
+	void get_airspeed_innov(float *airspeed_innov) { *airspeed_innov = _airspeed_innov; }
 
 	// gets the innovation variance of the airspeed measurement
-	void get_airspeed_innov_var(float *airspeed_innov_var);
+	void get_airspeed_innov_var(float *airspeed_innov_var) { *airspeed_innov_var = _airspeed_innov_var; }
 
 	// gets the innovations of synthetic sideslip measurement
-	void get_beta_innov(float *beta_innov);
+	void get_beta_innov(float *beta_innov) { *beta_innov = _beta_innov; }
 
 	// gets the innovation variance of the synthetic sideslip measurement
-	void get_beta_innov_var(float *beta_innov_var);
+	void get_beta_innov_var(float *beta_innov_var) { *beta_innov_var = _beta_innov_var; }
 
 	// gets the innovation variance of the heading measurement
-	void get_heading_innov_var(float *heading_innov_var);
+	void get_heading_innov_var(float *heading_innov_var) { *heading_innov_var = _heading_innov_var; }
 
 	// gets the innovation variance of the flow measurement
 	void get_flow_innov_var(float flow_innov_var[2]);
@@ -161,7 +161,7 @@ public:
 
 	// return an array containing the output predictor angular, velocity and position tracking
 	// error magnitudes (rad), (m/sec), (m)
-	void get_output_tracking_error(float error[3]);
+	void get_output_tracking_error(float error[3]) { memcpy(error, _output_tracking_error, 3 * sizeof(float)); }
 
 	/*
 	Returns  following IMU vibration metrics in the following array locations
@@ -169,10 +169,10 @@ public:
 	1 : Gyro high frequency vibe = filtered length of (delta_angle - prev_delta_angle)
 	2 : Accel high frequency vibe = filtered length of (delta_velocity - prev_delta_velocity)
 	*/
-	void get_imu_vibe_metrics(float vibe[3]);
+	void get_imu_vibe_metrics(float vibe[3]) { memcpy(vibe, _vibe_metrics, 3 * sizeof(float)); }
 
 	// return true if the global position estimate is valid
-	bool global_position_is_valid();
+	bool global_position_is_valid() { return (_NED_origin_initialised && !inertial_dead_reckoning()); }
 
 	// return true if the EKF is dead reckoning the position using inertial data only
 	bool inertial_dead_reckoning();
@@ -190,7 +190,7 @@ public:
 	void get_gyro_bias(float bias[3]);
 
 	// get GPS check status
-	void get_gps_check_status(uint16_t *val);
+	void get_gps_check_status(uint16_t *val) { *val = _gps_check_fail_status.value; }
 
 	// return the amount the local vertical position changed in the last reset and the number of reset events
 	void get_posD_reset(float *delta, uint8_t *counter) {*delta = _state_reset_status.posD_change; *counter = _state_reset_status.posD_counter;}
@@ -512,7 +512,6 @@ private:
 	// and update the rotation matrix which transforms EV navigation frame measurements into NED
 	void calcExtVisRotMat();
 
-
 	// reset the estimated angular misalignment vector between the EV naigration frame and the EKF navigation frame
 	// and reset the rotation matrix which transforms EV navigation frame measurements into NED
 	void resetExtVisRotMat();
@@ -584,10 +583,7 @@ private:
 	void checkForStuckRange();
 
 	// return the square of two floating point numbers - used in auto coded sections
-	inline float sq(float var)
-	{
-		return var * var;
-	}
+	float sq(float var) { return var * var; }
 
 	// set control flags to use baro height
 	void setControlBaroHeight();
@@ -602,10 +598,20 @@ private:
 	void setControlEVHeight();
 
 	// zero the specified range of rows in the state covariance matrix
-	void zeroRows(float (&cov_mat)[_k_num_states][_k_num_states], uint8_t first, uint8_t last);
+	void zeroRows(float (&cov_mat)[_k_num_states][_k_num_states], uint8_t first, uint8_t last)
+	{
+		for (uint8_t row = first; row <= last; row++) {
+			memset(&cov_mat[row][0], 0, sizeof(cov_mat[0][0]) * 24);
+		}
+	}
 
 	// zero the specified range of columns in the state covariance matrix
-	void zeroCols(float (&cov_mat)[_k_num_states][_k_num_states], uint8_t first, uint8_t last);
+	void zeroCols(float (&cov_mat)[_k_num_states][_k_num_states], uint8_t first, uint8_t last)
+	{
+		for (uint8_t row = 0; row <= 23; row++) {
+			memset(&cov_mat[row][first], 0, sizeof(cov_mat[0][0]) * (1 + last - first));
+		}
+	}
 
 	// zero the specified range of off diagonals in the state covariance matrix
 	void zeroOffDiag(float (&cov_mat)[_k_num_states][_k_num_states], uint8_t first, uint8_t last);

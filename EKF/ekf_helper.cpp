@@ -763,80 +763,6 @@ void Ekf::calcEarthRateNED(Vector3f &omega, double lat_rad) const
 	omega(2) = -_k_earth_rate * sinf((float)lat_rad);
 }
 
-// gets the innovations of velocity and position measurements
-// 0-2 vel, 3-5 pos
-void Ekf::get_vel_pos_innov(float vel_pos_innov[6])
-{
-	memcpy(vel_pos_innov, _vel_pos_innov, sizeof(float) * 6);
-}
-
-// gets the innovations of the earth magnetic field measurements
-void Ekf::get_aux_vel_innov(float aux_vel_innov[2])
-{
-	memcpy(aux_vel_innov, _aux_vel_innov, sizeof(float) * 2);
-}
-
-// writes the innovations of the earth magnetic field measurements
-void Ekf::get_mag_innov(float mag_innov[3])
-{
-	memcpy(mag_innov, _mag_innov, 3 * sizeof(float));
-}
-
-// gets the innovations of the airspeed measnurement
-void Ekf::get_airspeed_innov(float *airspeed_innov)
-{
-	memcpy(airspeed_innov, &_airspeed_innov, sizeof(float));
-}
-
-// gets the innovations of the synthetic sideslip measurements
-void Ekf::get_beta_innov(float *beta_innov)
-{
-	memcpy(beta_innov, &_beta_innov, sizeof(float));
-}
-
-// gets the innovations of the heading measurement
-void Ekf::get_heading_innov(float *heading_innov)
-{
-	memcpy(heading_innov, &_heading_innov, sizeof(float));
-}
-
-// gets the innovation variances of velocity and position measurements
-// 0-2 vel, 3-5 pos
-void Ekf::get_vel_pos_innov_var(float vel_pos_innov_var[6])
-{
-	memcpy(vel_pos_innov_var, _vel_pos_innov_var, sizeof(float) * 6);
-}
-
-// gets the innovation variances of the earth magnetic field measurements
-void Ekf::get_mag_innov_var(float mag_innov_var[3])
-{
-	memcpy(mag_innov_var, _mag_innov_var, sizeof(float) * 3);
-}
-
-// gest the innovation variance of the airspeed measurement
-void Ekf::get_airspeed_innov_var(float *airspeed_innov_var)
-{
-	memcpy(airspeed_innov_var, &_airspeed_innov_var, sizeof(float));
-}
-
-// gets the innovation variance of the synthetic sideslip measurement
-void Ekf::get_beta_innov_var(float *beta_innov_var)
-{
-	memcpy(beta_innov_var, &_beta_innov_var, sizeof(float));
-}
-
-// gets the innovation variance of the heading measurement
-void Ekf::get_heading_innov_var(float *heading_innov_var)
-{
-	memcpy(heading_innov_var, &_heading_innov_var, sizeof(float));
-}
-
-// get GPS check status
-void Ekf::get_gps_check_status(uint16_t *val)
-{
-	*val = _gps_check_fail_status.value;
-}
-
 // get the state vector at the delayed time horizon
 void Ekf::get_state_delayed(float *state)
 {
@@ -876,21 +802,17 @@ void Ekf::get_state_delayed(float *state)
 // get the accelerometer bias
 void Ekf::get_accel_bias(float bias[3])
 {
-	float temp[3];
-	temp[0] = _state.accel_bias(0) / _dt_ekf_avg;
-	temp[1] = _state.accel_bias(1) / _dt_ekf_avg;
-	temp[2] = _state.accel_bias(2) / _dt_ekf_avg;
-	memcpy(bias, temp, 3 * sizeof(float));
+	bias[0] = _state.accel_bias(0) / _dt_ekf_avg;
+	bias[1] = _state.accel_bias(1) / _dt_ekf_avg;
+	bias[2] = _state.accel_bias(2) / _dt_ekf_avg;
 }
 
 // get the gyroscope bias in rad/s
 void Ekf::get_gyro_bias(float bias[3])
 {
-	float temp[3];
-	temp[0] = _state.gyro_bias(0) / _dt_ekf_avg;
-	temp[1] = _state.gyro_bias(1) / _dt_ekf_avg;
-	temp[2] = _state.gyro_bias(2) / _dt_ekf_avg;
-	memcpy(bias, temp, 3 * sizeof(float));
+	bias[0] = _state.gyro_bias(0) / _dt_ekf_avg;
+	bias[1] = _state.gyro_bias(1) / _dt_ekf_avg;
+	bias[2] = _state.gyro_bias(2) / _dt_ekf_avg;
 }
 
 // get the diagonal elements of the covariance matrix
@@ -905,28 +827,11 @@ void Ekf::get_covariances(float *covariances)
 // return true if the origin is valid
 bool Ekf::get_ekf_origin(uint64_t *origin_time, map_projection_reference_s *origin_pos, float *origin_alt)
 {
-	memcpy(origin_time, &_last_gps_origin_time_us, sizeof(uint64_t));
-	memcpy(origin_pos, &_pos_ref, sizeof(map_projection_reference_s));
-	memcpy(origin_alt, &_gps_alt_ref, sizeof(float));
+	*origin_time = _last_gps_origin_time_us;
+	*origin_pos = _pos_ref;
+	*origin_alt = _gps_alt_ref;
+
 	return _NED_origin_initialised;
-}
-
-// return an array containing the output predictor angular, velocity and position tracking
-// error magnitudes (rad), (m/s), (m)
-void Ekf::get_output_tracking_error(float error[3])
-{
-	memcpy(error, _output_tracking_error, 3 * sizeof(float));
-}
-
-/*
-Returns  following IMU vibration metrics in the following array locations
-0 : Gyro delta angle coning metric = filtered length of (delta_angle x prev_delta_angle)
-1 : Gyro high frequency vibe = filtered length of (delta_angle - prev_delta_angle)
-2 : Accel high frequency vibe = filtered length of (delta_velocity - prev_delta_velocity)
-*/
-void Ekf::get_imu_vibe_metrics(float vibe[3])
-{
-	memcpy(vibe, _vibe_metrics, 3 * sizeof(float));
 }
 
 // get the 1-sigma horizontal and vertical position uncertainty of the ekf WGS-84 position
@@ -935,8 +840,8 @@ void Ekf::get_ekf_gpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_recko
 	// report absolute accuracy taking into account the uncertainty in location of the origin
 	// If not aiding, return 0 for horizontal position estimate as no estimate is available
 	// TODO - allow for baro drift in vertical position error
-	float hpos_err;
-	float vpos_err;
+	float hpos_err = 0.0f;
+	float vpos_err = 0.0f;
 	bool vel_pos_aiding = (_control_status.flags.gps ||
 			       _control_status.flags.opt_flow ||
 			       _control_status.flags.ev_pos ||
@@ -945,11 +850,6 @@ void Ekf::get_ekf_gpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_recko
 	if (vel_pos_aiding && _NED_origin_initialised) {
 		hpos_err = sqrtf(P[7][7] + P[8][8] + sq(_gps_origin_eph));
 		vpos_err = sqrtf(P[9][9] + sq(_gps_origin_epv));
-
-	} else {
-		hpos_err = 0.0f;
-		vpos_err = 0.0f;
-
 	}
 
 	// If we are dead-reckoning, use the innovations as a conservative alternate measure of the horizontal position error
@@ -957,20 +857,19 @@ void Ekf::get_ekf_gpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_recko
 	// and using state variances for accuracy reporting is overly optimistic in these situations
 	if (_is_dead_reckoning && (_control_status.flags.gps || _control_status.flags.ev_pos)) {
 		hpos_err = math::max(hpos_err, sqrtf(_vel_pos_innov[3] * _vel_pos_innov[3] + _vel_pos_innov[4] * _vel_pos_innov[4]));
-
 	}
 
-	memcpy(ekf_eph, &hpos_err, sizeof(float));
-	memcpy(ekf_epv, &vpos_err, sizeof(float));
-	memcpy(dead_reckoning, &_is_dead_reckoning, sizeof(bool));
+	*ekf_eph = hpos_err;
+	*ekf_epv = vpos_err;
+	*dead_reckoning = _is_dead_reckoning;
 }
 
 // get the 1-sigma horizontal and vertical position uncertainty of the ekf local position
 void Ekf::get_ekf_lpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_reckoning)
 {
 	// TODO - allow for baro drift in vertical position error
-	float hpos_err;
-	float vpos_err;
+	float hpos_err = 0.0f;
+	float vpos_err = 0.0f;
 	bool vel_pos_aiding = (_control_status.flags.gps ||
 			       _control_status.flags.opt_flow ||
 			       _control_status.flags.ev_pos ||
@@ -979,11 +878,6 @@ void Ekf::get_ekf_lpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_recko
 	if (vel_pos_aiding && _NED_origin_initialised) {
 		hpos_err = sqrtf(P[7][7] + P[8][8]);
 		vpos_err = sqrtf(P[9][9]);
-
-	} else {
-		hpos_err = 0.0f;
-		vpos_err = 0.0f;
-
 	}
 
 	// If we are dead-reckoning, use the innovations as a conservative alternate measure of the horizontal position error
@@ -991,19 +885,18 @@ void Ekf::get_ekf_lpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_recko
 	// and using state variances for accuracy reporting is overly optimistic in these situations
 	if (_is_dead_reckoning && (_control_status.flags.gps || _control_status.flags.ev_pos)) {
 		hpos_err = math::max(hpos_err, sqrtf(_vel_pos_innov[3] * _vel_pos_innov[3] + _vel_pos_innov[4] * _vel_pos_innov[4]));
-
 	}
 
-	memcpy(ekf_eph, &hpos_err, sizeof(float));
-	memcpy(ekf_epv, &vpos_err, sizeof(float));
-	memcpy(dead_reckoning, &_is_dead_reckoning, sizeof(bool));
+	*ekf_eph = hpos_err;
+	*ekf_epv = vpos_err;
+	*dead_reckoning = _is_dead_reckoning;
 }
 
 // get the 1-sigma horizontal and vertical velocity uncertainty
 void Ekf::get_ekf_vel_accuracy(float *ekf_evh, float *ekf_evv, bool *dead_reckoning)
 {
-	float hvel_err;
-	float vvel_err;
+	float hvel_err = 0.0f;
+	float vvel_err = 0.0f;
 	bool vel_pos_aiding = (_control_status.flags.gps ||
 			       _control_status.flags.opt_flow ||
 			       _control_status.flags.ev_pos ||
@@ -1012,11 +905,6 @@ void Ekf::get_ekf_vel_accuracy(float *ekf_evh, float *ekf_evv, bool *dead_reckon
 	if (vel_pos_aiding && _NED_origin_initialised) {
 		hvel_err = sqrtf(P[4][4] + P[5][5]);
 		vvel_err = sqrtf(P[6][6]);
-
-	} else {
-		hvel_err = 0.0f;
-		vvel_err = 0.0f;
-
 	}
 
 	// If we are dead-reckoning, use the innovations as a conservative alternate measure of the horizontal velocity error
@@ -1039,9 +927,9 @@ void Ekf::get_ekf_vel_accuracy(float *ekf_evh, float *ekf_evv, bool *dead_reckon
 		hvel_err = math::max(hvel_err, vel_err_conservative);
 	}
 
-	memcpy(ekf_evh, &hvel_err, sizeof(float));
-	memcpy(ekf_evv, &vvel_err, sizeof(float));
-	memcpy(dead_reckoning, &_is_dead_reckoning, sizeof(bool));
+	*ekf_evh = hvel_err;
+	*ekf_evv = vvel_err;
+	*dead_reckoning = _is_dead_reckoning;
 }
 
 /*
@@ -1051,8 +939,8 @@ limit_hagl : Boolean true when height above ground needs to be controlled to rem
 */
 void Ekf::get_ekf_ctrl_limits(float *vxy_max, bool *limit_hagl)
 {
-	float flow_gnd_spd_max;
-	bool flow_limit_hagl;
+	float flow_gnd_spd_max = NAN;
+	bool flow_limit_hagl = false;
 
 	// If relying on optical flow for navigation we need to keep within flow and range sensor limits
 	bool relying_on_optical_flow = _control_status.flags.opt_flow && !(_control_status.flags.gps || _control_status.flags.ev_pos);
@@ -1062,23 +950,16 @@ void Ekf::get_ekf_ctrl_limits(float *vxy_max, bool *limit_hagl)
 		flow_gnd_spd_max = fmaxf(flow_gnd_spd_max , 0.0f);
 
 		flow_limit_hagl = true;
-
-	} else {
-		flow_gnd_spd_max = NAN;
-		flow_limit_hagl = false;
-
 	}
 
-	memcpy(vxy_max, &flow_gnd_spd_max, sizeof(float));
-	memcpy(limit_hagl, &flow_limit_hagl, sizeof(bool));
-
+	*vxy_max = flow_gnd_spd_max;
+	*limit_hagl = flow_limit_hagl;
 }
 
 bool Ekf::reset_imu_bias()
 {
 	if (_imu_sample_delayed.time_us - _last_imu_bias_cov_reset_us < (uint64_t)10e6) {
 		return false;
-
 	}
 
 	// Zero the delta angle and delta velocity bias states
@@ -1101,7 +982,6 @@ bool Ekf::reset_imu_bias()
 	_prev_dvel_bias_var(2) = P[15][15];
 
 	return true;
-
 }
 
 // get EKF innovation consistency check status information comprising of:
@@ -1132,7 +1012,7 @@ void Ekf::get_innovation_test_status(uint16_t *status, float *mag, float *vel, f
 // return a bitmask integer that describes which state estimates are valid
 void Ekf::get_ekf_soln_status(uint16_t *status)
 {
-	ekf_solution_status soln_status{};
+	ekf_solution_status soln_status;
 	soln_status.flags.attitude = _control_status.flags.tilt_align && _control_status.flags.yaw_align && (_fault_status.value == 0);
 	soln_status.flags.velocity_horiz = (_control_status.flags.gps || _control_status.flags.ev_pos || _control_status.flags.opt_flow || (_control_status.flags.fuse_beta && _control_status.flags.fuse_aspd)) && (_fault_status.value == 0);
 	soln_status.flags.velocity_vert = (_control_status.flags.baro_hgt || _control_status.flags.ev_hgt || _control_status.flags.gps_hgt || _control_status.flags.rng_hgt) && (_fault_status.value == 0);
@@ -1189,26 +1069,6 @@ void Ekf::fuse(float *K, float innovation)
 	}
 }
 
-// zero specified range of rows in the state covariance matrix
-void Ekf::zeroRows(float (&cov_mat)[_k_num_states][_k_num_states], uint8_t first, uint8_t last)
-{
-	uint8_t row;
-
-	for (row = first; row <= last; row++) {
-		memset(&cov_mat[row][0], 0, sizeof(cov_mat[0][0]) * 24);
-	}
-}
-
-// zero specified range of columns in the state covariance matrix
-void Ekf::zeroCols(float (&cov_mat)[_k_num_states][_k_num_states], uint8_t first, uint8_t last)
-{
-	uint8_t row;
-
-	for (row = 0; row <= 23; row++) {
-		memset(&cov_mat[row][first], 0, sizeof(cov_mat[0][0]) * (1 + last - first));
-	}
-}
-
 void Ekf::zeroOffDiag(float (&cov_mat)[_k_num_states][_k_num_states], uint8_t first, uint8_t last)
 {
 	// save diagonal elements
@@ -1239,13 +1099,6 @@ void Ekf::setDiag(float (&cov_mat)[_k_num_states][_k_num_states], uint8_t first,
 	for (row = first; row <= last; row++) {
 		cov_mat[row][row] = variance;
 	}
-
-}
-
-bool Ekf::global_position_is_valid()
-{
-	// return true if we are not doing unconstrained free inertial navigation and the origin is set
-	return (_NED_origin_initialised && !inertial_dead_reckoning());
 }
 
 // return true if we are totally reliant on inertial dead-reckoning for position
