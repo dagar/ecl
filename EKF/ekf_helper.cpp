@@ -936,93 +936,66 @@ void Ekf::get_imu_vibe_metrics(float vibe[3])
 }
 
 // get the 1-sigma horizontal and vertical position uncertainty of the ekf WGS-84 position
-void Ekf::get_ekf_gpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_reckoning)
+void Ekf::get_ekf_gpos_accuracy(float *ekf_eph, float *ekf_epv)
 {
 	// report absolute accuracy taking into account the uncertainty in location of the origin
 	// If not aiding, return 0 for horizontal position estimate as no estimate is available
 	// TODO - allow for baro drift in vertical position error
-	float hpos_err;
-	float vpos_err;
-	bool vel_pos_aiding = (_control_status.flags.gps ||
-			       _control_status.flags.opt_flow ||
-			       _control_status.flags.ev_pos ||
-			       (_control_status.flags.fuse_beta && _control_status.flags.fuse_aspd));
+	float hpos_err = 0.0f;
+	float vpos_err = 0.0f;
 
-	if (vel_pos_aiding && _NED_origin_initialised) {
+	if (vel_pos_aiding() && _NED_origin_initialised) {
 		hpos_err = sqrtf(P[7][7] + P[8][8] + sq(_gps_origin_eph));
 		vpos_err = sqrtf(P[9][9] + sq(_gps_origin_epv));
-
-	} else {
-		hpos_err = 0.0f;
-		vpos_err = 0.0f;
-
 	}
 
 	// If we are dead-reckoning, use the innovations as a conservative alternate measure of the horizontal position error
 	// The reason is that complete rejection of measurements is often casued by heading misalignment or inertial sensing errors
 	// and using state variances for accuracy reporting is overly optimistic in these situations
-	if (_is_dead_reckoning && (_control_status.flags.gps || _control_status.flags.ev_pos)) {
-		hpos_err = math::max(hpos_err, sqrtf(_vel_pos_innov[3] * _vel_pos_innov[3] + _vel_pos_innov[4] * _vel_pos_innov[4]));
-
+	if (inertial_dead_reckoning()) {
+		if (_control_status.flags.gps || _control_status.flags.ev_pos) {
+			hpos_err = math::max(hpos_err, sqrtf(_vel_pos_innov[3] * _vel_pos_innov[3] + _vel_pos_innov[4] * _vel_pos_innov[4]));
+		}
 	}
 
-	memcpy(ekf_eph, &hpos_err, sizeof(float));
-	memcpy(ekf_epv, &vpos_err, sizeof(float));
-	memcpy(dead_reckoning, &_is_dead_reckoning, sizeof(bool));
+	*ekf_eph = hpos_err;
+	*ekf_epv = vpos_err;
 }
 
 // get the 1-sigma horizontal and vertical position uncertainty of the ekf local position
-void Ekf::get_ekf_lpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_reckoning)
+void Ekf::get_ekf_lpos_accuracy(float *ekf_eph, float *ekf_epv)
 {
 	// TODO - allow for baro drift in vertical position error
-	float hpos_err;
-	float vpos_err;
-	bool vel_pos_aiding = (_control_status.flags.gps ||
-			       _control_status.flags.opt_flow ||
-			       _control_status.flags.ev_pos ||
-			       (_control_status.flags.fuse_beta && _control_status.flags.fuse_aspd));
+	float hpos_err = 0.0f;
+	float vpos_err = 0.0f;
 
-	if (vel_pos_aiding && _NED_origin_initialised) {
+	if (vel_pos_aiding() && _NED_origin_initialised) {
 		hpos_err = sqrtf(P[7][7] + P[8][8]);
 		vpos_err = sqrtf(P[9][9]);
-
-	} else {
-		hpos_err = 0.0f;
-		vpos_err = 0.0f;
-
 	}
 
 	// If we are dead-reckoning, use the innovations as a conservative alternate measure of the horizontal position error
-	// The reason is that complete rejection of measurements is often casued by heading misalignment or inertial sensing errors
+	// The reason is that complete rejection of measurements is often caused by heading misalignment or inertial sensing errors
 	// and using state variances for accuracy reporting is overly optimistic in these situations
-	if (_is_dead_reckoning && (_control_status.flags.gps || _control_status.flags.ev_pos)) {
-		hpos_err = math::max(hpos_err, sqrtf(_vel_pos_innov[3] * _vel_pos_innov[3] + _vel_pos_innov[4] * _vel_pos_innov[4]));
-
+	if (inertial_dead_reckoning()) {
+		if (_control_status.flags.gps || _control_status.flags.ev_pos) {
+			hpos_err = math::max(hpos_err, sqrtf(_vel_pos_innov[3] * _vel_pos_innov[3] + _vel_pos_innov[4] * _vel_pos_innov[4]));
+		}
 	}
 
-	memcpy(ekf_eph, &hpos_err, sizeof(float));
-	memcpy(ekf_epv, &vpos_err, sizeof(float));
-	memcpy(dead_reckoning, &_is_dead_reckoning, sizeof(bool));
+	*ekf_eph = hpos_err;
+	*ekf_epv = vpos_err;
 }
 
 // get the 1-sigma horizontal and vertical velocity uncertainty
-void Ekf::get_ekf_vel_accuracy(float *ekf_evh, float *ekf_evv, bool *dead_reckoning)
+void Ekf::get_ekf_vel_accuracy(float *ekf_evh, float *ekf_evv)
 {
-	float hvel_err;
-	float vvel_err;
-	bool vel_pos_aiding = (_control_status.flags.gps ||
-			       _control_status.flags.opt_flow ||
-			       _control_status.flags.ev_pos ||
-			       (_control_status.flags.fuse_beta && _control_status.flags.fuse_aspd));
+	float hvel_err = 0.0f;
+	float vvel_err = 0.0f;
 
-	if (vel_pos_aiding && _NED_origin_initialised) {
+	if (vel_pos_aiding() && _NED_origin_initialised) {
 		hvel_err = sqrtf(P[4][4] + P[5][5]);
 		vvel_err = sqrtf(P[6][6]);
-
-	} else {
-		hvel_err = 0.0f;
-		vvel_err = 0.0f;
-
 	}
 
 	// If we are dead-reckoning, use the innovations as a conservative alternate measure of the horizontal velocity error
@@ -1030,9 +1003,9 @@ void Ekf::get_ekf_vel_accuracy(float *ekf_evh, float *ekf_evv, bool *dead_reckon
 	// and using state variances for accuracy reporting is overly optimistic in these situations
 	float vel_err_conservative = 0.0f;
 
-	if (_is_dead_reckoning) {
+	if (inertial_dead_reckoning()) {
 		if (_control_status.flags.opt_flow) {
-			float gndclearance = math::max(_params.rng_gnd_clearance, 0.1f);
+			const float gndclearance = math::max(_params.rng_gnd_clearance, 0.1f);
 			vel_err_conservative = math::max((_terrain_vpos - _state.pos(2)),
 							 gndclearance) * sqrtf(_flow_innov[0] * _flow_innov[0] + _flow_innov[1] * _flow_innov[1]);
 		}
@@ -1045,9 +1018,8 @@ void Ekf::get_ekf_vel_accuracy(float *ekf_evh, float *ekf_evv, bool *dead_reckon
 		hvel_err = math::max(hvel_err, vel_err_conservative);
 	}
 
-	memcpy(ekf_evh, &hvel_err, sizeof(float));
-	memcpy(ekf_evv, &vvel_err, sizeof(float));
-	memcpy(dead_reckoning, &_is_dead_reckoning, sizeof(bool));
+	*ekf_evh = hvel_err;
+	*ekf_evv = vvel_err;
 }
 
 /*
@@ -1138,7 +1110,7 @@ void Ekf::get_innovation_test_status(uint16_t *status, float *mag, float *vel, f
 // return a bitmask integer that describes which state estimates are valid
 void Ekf::get_ekf_soln_status(uint16_t *status)
 {
-	ekf_solution_status soln_status{};
+	ekf_solution_status soln_status;
 	soln_status.flags.attitude = _control_status.flags.tilt_align && _control_status.flags.yaw_align && (_fault_status.value == 0);
 	soln_status.flags.velocity_horiz = (_control_status.flags.gps || _control_status.flags.ev_pos || _control_status.flags.opt_flow || (_control_status.flags.fuse_beta && _control_status.flags.fuse_aspd)) && (_fault_status.value == 0);
 	soln_status.flags.velocity_vert = (_control_status.flags.baro_hgt || _control_status.flags.ev_hgt || _control_status.flags.gps_hgt || _control_status.flags.rng_hgt) && (_fault_status.value == 0);
@@ -1251,11 +1223,11 @@ void Ekf::setDiag(float (&cov_mat)[_k_num_states][_k_num_states], uint8_t first,
 bool Ekf::global_position_is_valid()
 {
 	// return true if we are not doing unconstrained free inertial navigation and the origin is set
-	return (_NED_origin_initialised && !_deadreckon_time_exceeded);
+	return (_NED_origin_initialised && !_dead_reckon_time_exceeded);
 }
 
 // return true if we are totally reliant on inertial dead-reckoning for position
-void Ekf::update_deadreckoning_status()
+void Ekf::update_dead_reckoning_status()
 {
 	bool velPosAiding = (_control_status.flags.gps || _control_status.flags.ev_pos)
 			    && ((_time_last_imu - _time_last_pos_fuse <= _params.no_aid_timeout_max)
@@ -1264,15 +1236,29 @@ void Ekf::update_deadreckoning_status()
 	bool optFlowAiding = _control_status.flags.opt_flow && (_time_last_imu - _time_last_of_fuse <= _params.no_aid_timeout_max);
 	bool airDataAiding = _control_status.flags.wind && (_time_last_imu - _time_last_arsp_fuse <= _params.no_aid_timeout_max) && (_time_last_imu - _time_last_beta_fuse <= _params.no_aid_timeout_max);
 
-	_is_dead_reckoning = !velPosAiding && !optFlowAiding && !airDataAiding;
+	if (!velPosAiding && !optFlowAiding && !airDataAiding) {
+		// dead reckoning
 
-	// record the time we start inertial dead reckoning
-	if (!_is_dead_reckoning) {
-		_time_ins_deadreckon_start = _time_last_imu - _params.no_aid_timeout_max;
+		// record the time we start inertial dead reckoning
+		if (!_is_dead_reckoning) {
+			_time_ins_dead_reckon_start = _time_last_imu - _params.no_aid_timeout_max;
+			_dead_reckon_time_exceeded = false;
+		} else {
+			// we were already dead reckoning, check timeout
+			// report if we have been dead reckoning for too long
+			const int64_t dead_reckon_elapsed = (_time_last_imu - _time_ins_dead_reckon_start);
+			if (dead_reckon_elapsed > _params.valid_timeout_max) {
+				_dead_reckon_time_exceeded = true;
+			}
+		}
+
+		_is_dead_reckoning = true;
+
+	} else {
+		// not dead reckoning
+		_is_dead_reckoning = false;
+		_dead_reckon_time_exceeded = false;
 	}
-
-	// report if we have been deadreckoning for too long
-	_deadreckon_time_exceeded =  ((_time_last_imu - _time_ins_deadreckon_start) > (unsigned)_params.valid_timeout_max);
 }
 
 // perform a vector cross product

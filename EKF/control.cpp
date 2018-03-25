@@ -137,7 +137,7 @@ void Ekf::controlFusionModes()
 	controlAuxVelFusion();
 
 	// check if we are no longer fusing measurements that directly constrain velocity drift
-	update_deadreckoning_status();
+	update_dead_reckoning_status();
 }
 
 void Ekf::controlExternalVisionFusion()
@@ -578,7 +578,7 @@ void Ekf::controlHeightSensorTimeouts()
 	// check if height is continuously failing becasue of accel errors
 	bool continuous_bad_accel_hgt = ((_time_last_imu - _time_good_vert_accel) > (unsigned)_params.bad_acc_reset_delay_us);
 
-	// check if height has been inertial deadreckoning for too long
+	// check if height has been inertial dead reckoning for too long
 	bool hgt_fusion_timeout = ((_time_last_imu - _time_last_hgt_fuse) > (uint64_t)5e6);
 
 	// reset the vertical position and velocity states

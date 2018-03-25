@@ -143,13 +143,13 @@ public:
 	virtual bool get_ekf_origin(uint64_t *origin_time, map_projection_reference_s *origin_pos, float *origin_alt) = 0;
 
 	// get the 1-sigma horizontal and vertical position uncertainty of the ekf WGS-84 position
-	virtual void get_ekf_gpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_reckoning) = 0;
+	virtual void get_ekf_gpos_accuracy(float *ekf_eph, float *ekf_epv) = 0;
 
 	// get the 1-sigma horizontal and vertical position uncertainty of the ekf local position
-	virtual void get_ekf_lpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_reckoning) = 0;
+	virtual void get_ekf_lpos_accuracy(float *ekf_eph, float *ekf_epv) = 0;
 
 	// get the 1-sigma horizontal and vertical velocity uncertainty
-	virtual void get_ekf_vel_accuracy(float *ekf_evh, float *ekf_evv, bool *dead_reckoning) = 0;
+	virtual void get_ekf_vel_accuracy(float *ekf_evh, float *ekf_evv) = 0;
 
 	/*
 	Returns the following vehicle control limits required by the estimator.
@@ -230,13 +230,18 @@ public:
 	void set_update_mag_states_only_flag(bool update_mag_states_only) {_control_status.flags.update_mag_states_only = update_mag_states_only;}
 
 	// set air density used by the multi-rotor specific drag force fusion
-	void set_air_density(float air_density) {_air_density = air_density;}
+	void set_air_density(float air_density) { _air_density = air_density; }
 
 	// return true if the global position estimate is valid
 	virtual bool global_position_is_valid() = 0;
 
 	// return true if the EKF is dead reckoning the position using inertial data only
-	bool inertial_dead_reckoning() {return _is_dead_reckoning;}
+	bool inertial_dead_reckoning() { return _is_dead_reckoning; }
+
+	bool vel_pos_aiding() {
+		return (_control_status.flags.gps || _control_status.flags.opt_flow || _control_status.flags.ev_pos ||
+		       (_control_status.flags.fuse_beta && _control_status.flags.fuse_aspd));
+	}
 
 	// return true if the terrain estimate is valid
 	virtual bool get_terrain_valid() = 0;
@@ -452,7 +457,7 @@ protected:
 	innovation_fault_status_u _innov_check_fail_status{};
 
 	bool _is_dead_reckoning{false};	// true if we are no longer fusing measurements that constrain horizontal velocity drift
-	bool _deadreckon_time_exceeded{false};	// true if the horizontal nav solution has been deadreckoning for too long and is invalid
+	bool _dead_reckon_time_exceeded{false};	// true if the horizontal nav solution has been dead reckoning for too long and is invalid
 
 	// IMU vibration monitoring
 	Vector3f _delta_ang_prev;	// delta angle from the previous IMU measurement
