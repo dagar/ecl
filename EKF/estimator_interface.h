@@ -144,13 +144,13 @@ public:
 	virtual bool get_ekf_origin(uint64_t *origin_time, map_projection_reference_s *origin_pos, float *origin_alt) = 0;
 
 	// get the 1-sigma horizontal and vertical position uncertainty of the ekf WGS-84 position
-	virtual void get_ekf_gpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_reckoning) = 0;
+	virtual void get_ekf_gpos_accuracy(float *ekf_eph, float *ekf_epv) = 0;
 
 	// get the 1-sigma horizontal and vertical position uncertainty of the ekf local position
-	virtual void get_ekf_lpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_reckoning) = 0;
+	virtual void get_ekf_lpos_accuracy(float *ekf_eph, float *ekf_epv) = 0;
 
 	// get the 1-sigma horizontal and vertical velocity uncertainty
-	virtual void get_ekf_vel_accuracy(float *ekf_evh, float *ekf_evv, bool *dead_reckoning) = 0;
+	virtual void get_ekf_vel_accuracy(float *ekf_evh, float *ekf_evv) = 0;
 
 	/*
 	Returns the following vehicle control limits required by the estimator.
@@ -237,7 +237,10 @@ public:
 	virtual bool global_position_is_valid() = 0;
 
 	// return true if the EKF is dead reckoning the position using inertial data only
-	bool inertial_dead_reckoning() {return _is_dead_reckoning;}
+	bool inertial_dead_reckoning() const { return _is_dead_reckoning; }
+
+	// return true if the EKF is dead reckoning the position using wind data
+	bool wind_dead_reckoning() const { return _is_wind_dead_reckoning; }
 
 	// return true if the terrain estimate is valid
 	virtual bool get_terrain_valid() = 0;

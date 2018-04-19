@@ -981,7 +981,7 @@ void Ekf::get_imu_vibe_metrics(float vibe[3])
 }
 
 // get the 1-sigma horizontal and vertical position uncertainty of the ekf WGS-84 position
-void Ekf::get_ekf_gpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_reckoning)
+void Ekf::get_ekf_gpos_accuracy(float *ekf_eph, float *ekf_epv)
 {
 	// report absolute accuracy taking into account the uncertainty in location of the origin
 	// If not aiding, return 0 for horizontal position estimate as no estimate is available
@@ -996,24 +996,21 @@ void Ekf::get_ekf_gpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_recko
 	} else {
 		hpos_err = 0.0f;
 		vpos_err = 0.0f;
-
 	}
 
 	// If we are dead-reckoning, use the innovations as a conservative alternate measure of the horizontal position error
-	// The reason is that complete rejection of measurements is often casued by heading misalignment or inertial sensing errors
+	// The reason is that complete rejection of measurements is often caused by heading misalignment or inertial sensing errors
 	// and using state variances for accuracy reporting is overly optimistic in these situations
 	if (_is_dead_reckoning && (_control_status.flags.gps || _control_status.flags.ev_pos)) {
-		hpos_err = math::max(hpos_err, sqrtf(_vel_pos_innov[3] * _vel_pos_innov[3] + _vel_pos_innov[4] * _vel_pos_innov[4]));
-
+		hpos_err = math::max(hpos_err, sqrtf(sq(_vel_pos_innov[3]) + sq(_vel_pos_innov[4])));
 	}
 
-	memcpy(ekf_eph, &hpos_err, sizeof(float));
-	memcpy(ekf_epv, &vpos_err, sizeof(float));
-	memcpy(dead_reckoning, &_is_dead_reckoning, sizeof(bool));
+	*ekf_eph = hpos_err;
+	*ekf_epv = vpos_err;
 }
 
 // get the 1-sigma horizontal and vertical position uncertainty of the ekf local position
-void Ekf::get_ekf_lpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_reckoning)
+void Ekf::get_ekf_lpos_accuracy(float *ekf_eph, float *ekf_epv)
 {
 	// TODO - allow for baro drift in vertical position error
 	float hpos_err;
@@ -1030,24 +1027,21 @@ void Ekf::get_ekf_lpos_accuracy(float *ekf_eph, float *ekf_epv, bool *dead_recko
 	} else {
 		hpos_err = 0.0f;
 		vpos_err = 0.0f;
-
 	}
 
 	// If we are dead-reckoning, use the innovations as a conservative alternate measure of the horizontal position error
 	// The reason is that complete rejection of measurements is often casued by heading misalignment or inertial sensing errors
 	// and using state variances for accuracy reporting is overly optimistic in these situations
 	if (_is_dead_reckoning && (_control_status.flags.gps || _control_status.flags.ev_pos)) {
-		hpos_err = math::max(hpos_err, sqrtf(_vel_pos_innov[3] * _vel_pos_innov[3] + _vel_pos_innov[4] * _vel_pos_innov[4]));
-
+		hpos_err = math::max(hpos_err, sqrtf(sq(_vel_pos_innov[3]) + sq(_vel_pos_innov[4])));
 	}
 
-	memcpy(ekf_eph, &hpos_err, sizeof(float));
-	memcpy(ekf_epv, &vpos_err, sizeof(float));
-	memcpy(dead_reckoning, &_is_dead_reckoning, sizeof(bool));
+	*ekf_eph = hpos_err;
+	*ekf_epv = vpos_err;
 }
 
 // get the 1-sigma horizontal and vertical velocity uncertainty
-void Ekf::get_ekf_vel_accuracy(float *ekf_evh, float *ekf_evv, bool *dead_reckoning)
+void Ekf::get_ekf_vel_accuracy(float *ekf_evh, float *ekf_evv)
 {
 	float hvel_err;
 	float vvel_err;
@@ -1063,7 +1057,6 @@ void Ekf::get_ekf_vel_accuracy(float *ekf_evh, float *ekf_evv, bool *dead_reckon
 	} else {
 		hvel_err = 0.0f;
 		vvel_err = 0.0f;
-
 	}
 
 	// If we are dead-reckoning, use the innovations as a conservative alternate measure of the horizontal velocity error
@@ -1074,21 +1067,18 @@ void Ekf::get_ekf_vel_accuracy(float *ekf_evh, float *ekf_evv, bool *dead_reckon
 	if (_is_dead_reckoning) {
 		if (_control_status.flags.opt_flow) {
 			float gndclearance = math::max(_params.rng_gnd_clearance, 0.1f);
-			vel_err_conservative = math::max((_terrain_vpos - _state.pos(2)),
-							 gndclearance) * sqrtf(_flow_innov[0] * _flow_innov[0] + _flow_innov[1] * _flow_innov[1]);
+			vel_err_conservative = math::max((_terrain_vpos - _state.pos(2)), gndclearance) * sqrtf(sq(_flow_innov[0]) + sq(_flow_innov[1]));
 		}
 
 		if (_control_status.flags.gps || _control_status.flags.ev_pos) {
-			vel_err_conservative = math::max(vel_err_conservative,
-							 sqrtf(_vel_pos_innov[0] * _vel_pos_innov[0] + _vel_pos_innov[1] * _vel_pos_innov[1]));
+			vel_err_conservative = math::max(vel_err_conservative, sqrtf(sq(_vel_pos_innov[0]) + sq(_vel_pos_innov[1])));
 		}
 
 		hvel_err = math::max(hvel_err, vel_err_conservative);
 	}
 
-	memcpy(ekf_evh, &hvel_err, sizeof(float));
-	memcpy(ekf_evv, &vvel_err, sizeof(float));
-	memcpy(dead_reckoning, &_is_dead_reckoning, sizeof(bool));
+	*ekf_evh = hvel_err;
+	*ekf_evv = vvel_err;
 }
 
 /*
