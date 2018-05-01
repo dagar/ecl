@@ -44,12 +44,19 @@
 #include <cmath>
 #include <stdint.h>
 
-class __EXPORT DataValidator {
+class __EXPORT DataValidator
+{
 public:
 	static const unsigned dimensions = 3;
 
-	DataValidator();
-	virtual ~DataValidator() = default;
+	DataValidator() = default;
+	~DataValidator() = default;
+
+	// no copy, assignment, move, move assignment
+	DataValidator(const DataValidator &) = delete;
+	DataValidator &operator=(const DataValidator &) = delete;
+	DataValidator(DataValidator &&) = delete;
+	DataValidator &operator=(DataValidator &&) = delete;
 
 	/**
 	 * Put an item into the validator.
@@ -70,13 +77,13 @@ public:
 	 *
 	 * @return		the next sibling
 	 */
-	DataValidator*		sibling() { return _sibling; }
+	DataValidator		*sibling() { return _sibling; }
 
 	/**
 	 * Set the sibling to the next node in the group
 	 *
 	 */
-	void			setSibling(DataValidator* new_sibling) { _sibling = new_sibling; }
+	void			setSibling(DataValidator *new_sibling) { _sibling = new_sibling; }
 
 	/**
 	 * Get the confidence of this validator
@@ -94,7 +101,7 @@ public:
 	 * Get the values of this validator
 	 * @return		the stored value
 	 */
-	float*			value() { return _value; }
+	float			*value() { return _value; }
 
 	/**
 	 * Get the used status of this validator
@@ -123,13 +130,13 @@ public:
 	 * Get the RMS values of this validator
 	 * @return		the stored RMS
 	 */
-	float*			rms() { return _rms; }
+	float			*rms() { return _rms; }
 
 	/**
 	 * Get the vibration offset
 	 * @return		the stored vibration offset
 	 */
-	float*			vibration_offset() { return _vibe; }
+	float			*vibration_offset() { return _vibe; }
 
 	/**
 	 * Print the validator value
@@ -156,11 +163,30 @@ public:
 	 *
 	 * @return The timeout interval in microseconds
 	 */
-	uint32_t			get_timeout() const { return _timeout_interval; }
+	uint32_t		get_timeout() const { return _timeout_interval; }
+
+	/**
+	 * Get reference to the current differencce from primary
+	 *
+	 * @return The diff vector
+	 */
+	matrix::Vector3f	&get_diff() { return _diff; }
+
+	//const matrix::Vector3f get_value() { return matrix::Vector3f{_value}; }
 
 	/**
 	 * Data validator error states
 	 */
+
+	enum class ERROR_FLAG {
+		NO_ERROR = 0,
+		NO_DATA = 1,
+		STALE_DATA = 1 << 1,
+		TIMEOUT = 1 << 2,
+		HIGH_ERRCOUNT = 1 << 3,
+		HIGH_ERRDENSITY = 1 << 3
+	};
+
 	static constexpr uint32_t ERROR_FLAG_NO_ERROR      	= (0x00000000U);
 	static constexpr uint32_t ERROR_FLAG_NO_DATA       	= (0x00000001U);
 	static constexpr uint32_t ERROR_FLAG_STALE_DATA    	= (0x00000001U << 1);
@@ -169,27 +195,30 @@ public:
 	static constexpr uint32_t ERROR_FLAG_HIGH_ERRDENSITY 	= (0x00000001U << 4);
 
 private:
-	uint32_t _error_mask;			/**< sensor error state */
-	uint32_t _timeout_interval;		/**< interval in which the datastream times out in us */
-	uint64_t _time_last;			/**< last timestamp */
-	uint64_t _event_count;			/**< total data counter */
-	uint64_t _error_count;			/**< error count */
-	int _error_density;			/**< ratio between successful reads and errors */
-	int _priority;				/**< sensor nominal priority */
-	float _mean[dimensions];		/**< mean of value */
-	float _lp[dimensions];			/**< low pass value */
-	float _M2[dimensions];			/**< RMS component value */
-	float _rms[dimensions];			/**< root mean square error */
-	float _value[dimensions];		/**< last value */
-	float _vibe[dimensions];		/**< vibration level, in sensor unit */
-	float _value_equal_count;		/**< equal values in a row */
-	float _value_equal_count_threshold; /**< when to consider an equal count as a problem */
-	DataValidator *_sibling;		/**< sibling in the group */
+	uint32_t _error_mask{ERROR_FLAG_NO_ERROR};			/**< sensor error state */
+	uint32_t _timeout_interval{20000};		/**< interval in which the datastream times out in us */
+	uint64_t _time_last{0};			/**< last timestamp */
+	uint64_t _event_count{0};			/**< total data counter */
+	uint64_t _error_count{0};			/**< error count */
+
+	int _error_density{0};			/**< ratio between successful reads and errors */
+	int _priority{0};				/**< sensor nominal priority */
+
+	float _mean[dimensions] {};		/**< mean of value */
+	float _lp[dimensions] {};			/**< low pass value */
+	float _M2[dimensions] {};			/**< RMS component value */
+	float _rms[dimensions] {};			/**< root mean square error */
+	float _value[dimensions] {};		/**< last value */
+	float _vibe[dimensions] {};		/**< vibration level, in sensor unit */
+
+	float _value_equal_count{0};		/**< equal values in a row */
+	float _value_equal_count_threshold{VALUE_EQUAL_COUNT_DEFAULT}; /**< when to consider an equal count as a problem */
+
+	Matrix::Vector3f	_diff {};		/**< diff used for inconsistency comparison with the primary */
+
+	DataValidator *_sibling{nullptr};		/**< sibling in the group */
+
 	static const constexpr unsigned NORETURN_ERRCOUNT = 10000;	/**< if the error count reaches this value, return sensor as invalid */
 	static const constexpr float ERROR_DENSITY_WINDOW = 100.0f; 	/**< window in measurement counts for errors */
 	static const constexpr unsigned VALUE_EQUAL_COUNT_DEFAULT = 100;	/**< if the sensor value is the same (accumulated also between axes) this many times, flag it */
-
-	/* we don't want this class to be copied */
-	DataValidator(const DataValidator&) = delete;
-	DataValidator operator=(const DataValidator&) = delete;
 };
