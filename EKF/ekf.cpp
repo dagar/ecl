@@ -82,13 +82,13 @@ bool Ekf::init(uint64_t timestamp)
 	_sin_tilt_rng = sinf(_params.rng_sens_pitch);
 	_cos_tilt_rng = cosf(_params.rng_sens_pitch);
 
-	_control_status.value = 0;
-	_control_status_prev.value = 0;
+	_control_status = filter_control_status{};
+	_control_status_prev = filter_control_status{};
 
 	_dt_ekf_avg = 0.001f * (float)(FILTER_UPDATE_PERIOD_MS);
 
-	_fault_status.value = 0;
-	_innov_check_fail_status.value = 0;
+	_fault_status = fault_status{};
+	_innov_check_fail_status = innovation_fault_status{};
 
 	_accel_mag_filt = 0.0f;
 	_ang_rate_mag_filt = 0.0f;
@@ -131,7 +131,7 @@ bool Ekf::update()
 	}
 
 	// We don't have valid data to output until tilt and yaw alignment is complete
-	return _control_status.flags.tilt_align && _control_status.flags.yaw_align;
+	return _control_status.tilt_align && _control_status.yaw_align;
 }
 
 bool Ekf::initialiseFilter()
@@ -172,10 +172,10 @@ bool Ekf::initialiseFilter()
 
 			// set the height fusion mode to use external vision data when we start getting valid data from the buffer
 			if (_primary_hgt_source == VDIST_SENSOR_EV) {
-				_control_status.flags.baro_hgt = false;
-				_control_status.flags.gps_hgt = false;
-				_control_status.flags.rng_hgt = false;
-				_control_status.flags.ev_hgt = true;
+				_control_status.baro_hgt = false;
+				_control_status.gps_hgt = false;
+				_control_status.rng_hgt = false;
+				_control_status.ev_hgt = true;
 			}
 
 		} else if ((_ev_counter != 0) && (_ev_sample_delayed.time_us != 0)) {
@@ -260,7 +260,7 @@ bool Ekf::initialiseFilter()
 		Vector3f mag_init = _mag_filt_state;
 
 		// calculate the initial magnetic field and yaw alignment
-		_control_status.flags.yaw_align = resetMagHeading(mag_init);
+		_control_status.yaw_align = resetMagHeading(mag_init);
 
 		// initialise the rotation from EV to EKF navigation frame if required
 		if ((_params.fusion_mode & MASK_ROTATE_EV) && (_params.fusion_mode & MASK_USE_EVPOS)
@@ -269,7 +269,7 @@ bool Ekf::initialiseFilter()
 			resetExtVisRotMat();
 		}
 
-		if (_control_status.flags.rng_hgt) {
+		if (_control_status.rng_hgt) {
 			// if we are using the range finder as the primary source, then calculate the baro height at origin so  we can use baro as a backup
 			// so it can be used as a backup ad set the initial height using the range finder
 			const baroSample &baro_newest = _baro_buffer.get_newest();
@@ -277,7 +277,7 @@ bool Ekf::initialiseFilter()
 			_state.pos(2) = -math::max(_rng_filt_state * _R_rng_to_earth_2_2, _params.rng_gnd_clearance);
 			ECL_INFO("EKF using range finder height - commencing alignment");
 
-		} else if (_control_status.flags.ev_hgt) {
+		} else if (_control_status.ev_hgt) {
 			// if we are using external vision data for height, then the vertical position state needs to be reset
 			// because the initialisation position is not the zero datum
 			resetHeight();

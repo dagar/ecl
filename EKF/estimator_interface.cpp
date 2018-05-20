@@ -372,16 +372,16 @@ void EstimatorInterface::setOpticalFlowData(uint64_t time_usec, flow_message *fl
 			flow_magnitude_good = (flow_rate_magnitude <= _flow_max_rate);
 		}
 
-		bool relying_on_flow =  _control_status.flags.opt_flow
-				&& !_control_status.flags.gps
-				&& !_control_status.flags.ev_pos;
+		bool relying_on_flow =  _control_status.opt_flow
+				&& !_control_status.gps
+				&& !_control_status.ev_pos;
 
 		// check quality metric
 		bool flow_quality_good = (flow->quality >= _params.flow_qual_min);
 
 		// Always use data when on ground to allow for bad quality due to unfocussed sensors and operator handling
 		// If flow quality fails checks on ground, assume zero flow rate after body rate compensation
-		if ((delta_time_good && flow_quality_good && (flow_magnitude_good || relying_on_flow)) || !_control_status.flags.in_air) {
+		if ((delta_time_good && flow_quality_good && (flow_magnitude_good || relying_on_flow)) || !_control_status.in_air) {
 			flowSample optflow_sample_new;
 			// calculate the system time-stamp for the mid point of the integration period
 			optflow_sample_new.time_us = time_usec - _params.flow_delay_ms * 1000 - flow->dt / 2;
@@ -539,7 +539,7 @@ bool EstimatorInterface::initialise_interface(uint64_t timestamp)
 	_time_last_range = 0;
 	_time_last_airspeed = 0;
 	_time_last_optflow = 0;
-	_fault_status.value = 0;
+	_fault_status = fault_status{};
 	_time_last_ext_vision = 0;
 	return true;
 }

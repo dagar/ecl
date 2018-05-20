@@ -188,7 +188,7 @@ public:
 	void get_gyro_bias(float bias[3]);
 
 	// get GPS check status
-	void get_gps_check_status(uint16_t *val);
+	const gps_check_fail_status& get_gps_check_status() { return _gps_check_fail_status; }
 
 	// return the amount the local vertical position changed in the last reset and the number of reset events
 	void get_posD_reset(float *delta, uint8_t *counter) {*delta = _state_reset_status.posD_change; *counter = _state_reset_status.posD_counter;}
@@ -222,7 +222,7 @@ public:
 	// Innovation Test Ratios - these are the ratio of the innovation to the acceptance threshold.
 	// A value > 1 indicates that the sensor measurement has exceeded the maximum acceptable level and has been rejected by the EKF
 	// Where a measurement type is a vector quantity, eg magnetoemter, GPS position, etc, the maximum value is returned.
-	void get_innovation_test_status(uint16_t *status, float *mag, float *vel, float *pos, float *hgt, float *tas, float *hagl, float *beta);
+	void get_innovation_test_status(float *mag, float *vel, float *pos, float *hgt, float *tas, float *hagl, float *beta);
 
 	// return a bitmask integer that describes which state estimates can be used for flight control
 	void get_ekf_soln_status(uint16_t *status);
@@ -394,7 +394,7 @@ private:
 	float _saved_mag_variance[6] {};	///< magnetic field state variances that have been saved for use at the next initialisation (Gauss**2)
 	bool _velpos_reset_request{false};	///< true when a large yaw error has been fixed and a velocity and position state reset is required
 
-	gps_check_fail_status_u _gps_check_fail_status{};
+	gps_check_fail_status _gps_check_fail_status{};
 
 	// variables used to inhibit accel bias learning
 	bool _accel_bias_inhibit{false};	///< true when the accel bias learning is being inhibited

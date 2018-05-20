@@ -193,7 +193,7 @@ public:
 	parameters *getParamHandle() {return &_params;}
 
 	// set vehicle landed status data
-	void set_in_air_status(bool in_air) {_control_status.flags.in_air = in_air;}
+	void set_in_air_status(bool in_air) { _control_status.in_air = in_air; }
 
 	/*
 	Reset all IMU bias states and covariances to initial alignment values.
@@ -203,28 +203,28 @@ public:
 	virtual bool reset_imu_bias() = 0;
 
 	// get vehicle landed status data
-	bool get_in_air_status() {return _control_status.flags.in_air;}
+	bool get_in_air_status() { return _control_status.in_air; }
 
 	// get wind estimation status
-	bool get_wind_status() { return _control_status.flags.wind; }
+	bool get_wind_status() { return _control_status.wind; }
 
 	// set vehicle is fixed wing status
-	void set_is_fixed_wing(bool is_fixed_wing) {_control_status.flags.fixed_wing = is_fixed_wing;}
+	void set_is_fixed_wing(bool is_fixed_wing) { _control_status.fixed_wing = is_fixed_wing; }
 
 	// set flag if synthetic sideslip measurement should be fused
-	void set_fuse_beta_flag(bool fuse_beta) {_control_status.flags.fuse_beta = (fuse_beta && _control_status.flags.in_air);}
+	void set_fuse_beta_flag(bool fuse_beta) { _control_status.fuse_beta = (fuse_beta && _control_status.in_air); }
 
 	// set flag if static pressure rise due to ground effect is expected
 	// use _params.gnd_effect_deadzone to adjust for expected rise in static pressure
 	// flag will clear after GNDEFFECT_TIMEOUT uSec
 	void set_gnd_effect_flag(bool gnd_effect)
 	{
-		_control_status.flags.gnd_effect = gnd_effect;
+		_control_status.gnd_effect = gnd_effect;
 		_time_last_gnd_effect_on = _time_last_imu;
 	}
 
 	// set flag if only only mag states should be updated by the magnetometer
-	void set_update_mag_states_only_flag(bool update_mag_states_only) {_control_status.flags.update_mag_states_only = update_mag_states_only;}
+	void set_update_mag_states_only_flag(bool update_mag_states_only) { _control_status.update_mag_states_only = update_mag_states_only; }
 
 	// set air density used by the multi-rotor specific drag force fusion
 	void set_air_density(float air_density) {_air_density = air_density;}
@@ -248,7 +248,7 @@ public:
 	virtual bool global_position_is_valid() = 0;
 
 	// return true if the EKF is dead reckoning the position using inertial data only
-	bool inertial_dead_reckoning() {return _is_dead_reckoning;}
+	bool inertial_dead_reckoning() { return _is_dead_reckoning; }
 
 	// return true if the terrain estimate is valid
 	virtual bool get_terrain_valid() = 0;
@@ -259,12 +259,7 @@ public:
 	// return true if the local position estimate is valid
 	bool local_position_is_valid();
 
-	void copy_quaternion(float *quat)
-	{
-		for (unsigned i = 0; i < 4; i++) {
-			quat[i] = _output_new.quat_nominal(i);
-		}
-	}
+	const Quatf& get_quaternion() { return _output_new.quat_nominal; }
 
 	// return the quaternion defining the rotation from the EKF to the External Vision reference frame
 	virtual void get_ekf2ev_quaternion(float *quat) = 0;
@@ -288,11 +283,7 @@ public:
 	}
 
 	// get the derivative of the vertical position of the body frame origin in local NED earth frame
-	void get_pos_d_deriv(float *pos_d_deriv)
-	{
-		float var = _output_vert_new.vel_d - _vel_imu_rel_body_ned(2);
-		*pos_d_deriv = var;
-	}
+	float get_pos_d_deriv() { return (_output_vert_new.vel_d - _vel_imu_rel_body_ned(2)); }
 
 	// get the position of the body frame origin in local NED earth frame
 	void get_position(float *pos)
@@ -305,34 +296,23 @@ public:
 			pos[i] = _output_new.pos(i) - pos_offset_earth(i);
 		}
 	}
-	void copy_timestamp(uint64_t *time_us)
-	{
-		*time_us = _time_last_imu;
-	}
 
 	// Copy the magnetic declination that we wish to save to the EKF2_MAG_DECL parameter for the next startup
-	void copy_mag_decl_deg(float *val)
-	{
-		*val = _mag_declination_to_save_deg;
-	}
+	void copy_mag_decl_deg(float *val) { *val = _mag_declination_to_save_deg; }
 
 	virtual void get_accel_bias(float bias[3]) = 0;
 	virtual void get_gyro_bias(float bias[3]) = 0;
 
 	// get EKF mode status
-	void get_control_mode(uint32_t *val)
-	{
-		*val = _control_status.value;
-	}
+	const filter_control_status& get_control_status() { return _control_status; }
 
 	// get EKF internal fault status
-	void get_filter_fault_status(uint16_t *val)
-	{
-		*val = _fault_status.value;
-	}
+	const fault_status& get_filter_fault_status() { return _fault_status; }
+
+	const innovation_fault_status& get_innovation_check_status() { return _innov_check_fail_status; }
 
 	// get GPS check status
-	virtual void get_gps_check_status(uint16_t *val) = 0;
+	virtual const gps_check_fail_status& get_gps_check_status() = 0;
 
 	// return the amount the local vertical position changed in the last reset and the number of reset events
 	virtual void get_posD_reset(float *delta, uint8_t *counter) = 0;
@@ -354,7 +334,7 @@ public:
 	// Innovation Test Ratios - these are the ratio of the innovation to the acceptance threshold.
 	// A value > 1 indicates that the sensor measurement has exceeded the maximum acceptable level and has been rejected by the EKF
 	// Where a measurement type is a vector quantity, eg magnetoemter, GPS position, etc, the maximum value is returned.
-	virtual void get_innovation_test_status(uint16_t *status, float *mag, float *vel, float *pos, float *hgt, float *tas, float *hagl, float *beta) = 0;
+	virtual void get_innovation_test_status(float *mag, float *vel, float *pos, float *hgt, float *tas, float *hagl, float *beta) = 0;
 
 	// return a bitmask integer that describes which state estimates can be used for flight control
 	virtual void get_ekf_soln_status(uint16_t *status) = 0;
@@ -468,8 +448,9 @@ protected:
 	float _tas_test_ratio{0.0f};		// tas innovation consistency check ratio
 	float _terr_test_ratio{0.0f};		// height above terrain measurement innovation consistency check ratio
 	float _beta_test_ratio{0.0f};		// sideslip innovation consistency check ratio
-	float _drag_test_ratio[2] {};	// drag innovation cinsistency check ratio
-	innovation_fault_status_u _innov_check_fail_status{};
+	float _drag_test_ratio[2] {};	// drag innovation consistency check ratio
+
+	innovation_fault_status _innov_check_fail_status{};
 
 	bool _is_dead_reckoning{false};		// true if we are no longer fusing measurements that constrain horizontal velocity drift
 	bool _deadreckon_time_exceeded{false};	// true if the horizontal nav solution has been deadreckoning for too long and is invalid
@@ -519,7 +500,7 @@ protected:
 	uint64_t _time_last_gnd_effect_on{0};	//last time the baro ground effect compensation was turned on externally (uSec)
 	uint64_t _time_last_auxvel{0};
 
-	fault_status_u _fault_status{};
+	fault_status _fault_status{};
 
 	// allocate data buffers and intialise interface variables
 	bool initialise_interface(uint64_t timestamp);
@@ -531,10 +512,10 @@ protected:
 	float _mag_declination_to_save_deg{0.0f}; // magnetic declination to save to EKF2_MAG_DECL (deg)
 
 	// this is the current status of the filter control modes
-	filter_control_status_u _control_status{};
+	filter_control_status _control_status{};
 
 	// this is the previous status of the filter control modes - used to detect mode transitions
-	filter_control_status_u _control_status_prev{};
+	filter_control_status _control_status_prev{};
 
 	// perform a vector cross product
 	Vector3f cross_product(const Vector3f &vecIn1, const Vector3f &vecIn2);

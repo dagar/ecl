@@ -175,7 +175,7 @@
 
     %rename (get_control_mode) get_control_mode_;
     ekf_control_mode_flags_t get_control_mode_() {
-        filter_control_status_u result_union;
+        filter_control_status result_union;
         self->get_control_mode(&result_union.value);
 
         ekf_control_mode_flags_t result;
@@ -202,7 +202,7 @@
 
    %rename (get_filter_fault_status) get_filter_fault_status_;
    ekf_fault_status_flags_t get_filter_fault_status_() {
-        fault_status_u result_union;
+        fault_status result_union;
         self->get_filter_fault_status(&result_union.value);
 
         ekf_fault_status_flags_t result;
@@ -255,9 +255,7 @@
    void get_state_delayed_(float out[24]) {
        return self->get_state_delayed(out);
    }
-   void get_quaternion(float out[4]) {
-       return self->copy_quaternion(out);
-   }
+
 }
 
 // Let SWIG instantiate vector templates

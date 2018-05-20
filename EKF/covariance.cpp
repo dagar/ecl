@@ -73,10 +73,10 @@ void Ekf::initialiseCovariance()
 	P[7][7] = sq(fmaxf(_params.gps_pos_noise, 0.01f));
 	P[8][8] = P[7][7];
 
-	if (_control_status.flags.rng_hgt) {
+	if (_control_status.rng_hgt) {
 		P[9][9] = sq(fmaxf(_params.range_noise, 0.01f));
 
-	} else if (_control_status.flags.gps_hgt) {
+	} else if (_control_status.gps_hgt) {
 		float lower_limit = fmaxf(_params.gps_pos_noise, 0.01f);
 		float upper_limit = fmaxf(_params.pos_noaid_noise, lower_limit);
 		P[9][9] = sq(1.5f * math::constrain(_gps_sample_delayed.vacc, lower_limit, upper_limit));
@@ -204,7 +204,7 @@ void Ekf::predictCovariance()
 	// Don't continue to grow the earth field variances if they are becoming too large or we are not doing 3-axis fusion as this can make the covariance matrix badly conditioned
 	float mag_I_sig;
 
-	if (_control_status.flags.mag_3D && (P[16][16] + P[17][17] + P[18][18]) < 0.1f) {
+	if (_control_status.mag_3D && (P[16][16] + P[17][17] + P[18][18]) < 0.1f) {
 		mag_I_sig = dt * math::constrain(_params.mage_p_noise, 0.0f, 1.0f);
 
 	} else {
@@ -214,7 +214,7 @@ void Ekf::predictCovariance()
 	// Don't continue to grow the body field variances if they is becoming too large or we are not doing 3-axis fusion as this can make the covariance matrix badly conditioned
 	float mag_B_sig;
 
-	if (_control_status.flags.mag_3D && (P[19][19] + P[20][20] + P[21][21]) < 0.1f) {
+	if (_control_status.mag_3D && (P[19][19] + P[20][20] + P[21][21]) < 0.1f) {
 		mag_B_sig = dt * math::constrain(_params.magb_p_noise, 0.0f, 1.0f);
 
 	} else {
@@ -224,7 +224,7 @@ void Ekf::predictCovariance()
 	float wind_vel_sig;
 
 	// Don't continue to grow wind velocity state variances if they are becoming too large or we are not using wind velocity states as this can make the covariance matrix badly conditioned
-	if (_control_status.flags.wind && (P[22][22] + P[23][23]) < sq(_params.initial_wind_uncertainty)) {
+	if (_control_status.wind && (P[22][22] + P[23][23]) < sq(_params.initial_wind_uncertainty)) {
 		wind_vel_sig = dt * math::constrain(_params.wind_vel_p_noise, 0.0f, 1.0f);
 
 	} else {
@@ -489,7 +489,7 @@ void Ekf::predictCovariance()
 	}
 
 	// Don't do covariance prediction on magnetic field states unless we are using 3-axis fusion
-	if (_control_status.flags.mag_3D) {
+	if (_control_status.mag_3D) {
 		// calculate variances and upper diagonal covariances for earth and body magnetic field states
 		nextP[0][16] = P[0][16] + P[1][16]*SF[9] + P[2][16]*SF[11] + P[3][16]*SF[10] + P[10][16]*SF[14] + P[11][16]*SF[15] + P[12][16]*SPP[10];
 		nextP[1][16] = P[1][16] + P[0][16]*SF[8] + P[2][16]*SF[7] + P[3][16]*SF[11] - P[12][16]*SF[15] + P[11][16]*SPP[10] - (P[10][16]*q0)/2;
@@ -617,7 +617,7 @@ void Ekf::predictCovariance()
 	}
 
 	// Don't do covariance prediction on wind states unless we are using them
-	if (_control_status.flags.wind) {
+	if (_control_status.wind) {
 
 		// calculate variances and upper diagonal covariances for wind states
 		nextP[0][22] = P[0][22] + P[1][22]*SF[9] + P[2][22]*SF[11] + P[3][22]*SF[10] + P[10][22]*SF[14] + P[11][22]*SF[15] + P[12][22]*SPP[10];
@@ -811,11 +811,11 @@ void Ekf::fixCovarianceErrors()
 
 		// record the pass/fail
 		if (!bad_acc_bias) {
-			_fault_status.flags.bad_acc_bias = false;
+			_fault_status.bad_acc_bias = false;
 			_time_acc_bias_check = _time_last_imu;
 
 		} else {
-			_fault_status.flags.bad_acc_bias = true;
+			_fault_status.bad_acc_bias = true;
 		}
 
 		// if we have failed for 7 seconds continuously, reset the accel bias covariances to fix bad conditioning of
@@ -830,7 +830,7 @@ void Ekf::fixCovarianceErrors()
 			P[14][14] = varY;
 			P[15][15] = varZ;
 			_time_acc_bias_check = _time_last_imu;
-			_fault_status.flags.bad_acc_bias = false;
+			_fault_status.bad_acc_bias = false;
 			ECL_WARN("EKF invalid accel bias - resetting covariance");
 
 		} else {
@@ -841,7 +841,7 @@ void Ekf::fixCovarianceErrors()
 	}
 
 	// magnetic field states
-	if (!_control_status.flags.mag_3D) {
+	if (!_control_status.mag_3D) {
 		zeroRows(P, 16, 21);
 		zeroCols(P, 16, 21);
 
@@ -860,7 +860,7 @@ void Ekf::fixCovarianceErrors()
 	}
 
 	// wind velocity states
-	if (!_control_status.flags.wind) {
+	if (!_control_status.wind) {
 		zeroRows(P, 22, 23);
 		zeroCols(P, 22, 23);
 

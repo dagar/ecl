@@ -95,7 +95,7 @@ void Ekf::fuseVelPosHeight()
 	}
 
 	if (_fuse_height) {
-		if (_control_status.flags.baro_hgt) {
+		if (_control_status.baro_hgt) {
 			fuse_map[5] = true;
 			// vertical position innovation - baro measurement has opposite sign to earth z axis
 			innovation[5] = _state.pos(2) + _baro_sample_delayed.hgt - _baro_hgt_offset - _hgt_sensor_offset;
@@ -110,7 +110,7 @@ void Ekf::fuseVelPosHeight()
 			float deadzone_start = 0.25f * _params.baro_noise;
 			float deadzone_end = deadzone_start + _params.gnd_effect_deadzone;
 
-			if (_control_status.flags.gnd_effect) {
+			if (_control_status.gnd_effect) {
 				if (innovation[5] < -deadzone_start) {
 					if (innovation[5] <= -deadzone_end) {
 						innovation[5] += deadzone_end;
@@ -121,7 +121,7 @@ void Ekf::fuseVelPosHeight()
 				}
 			}
 
-		} else if (_control_status.flags.gps_hgt) {
+		} else if (_control_status.gps_hgt) {
 			fuse_map[5] = true;
 			// vertical position innovation - gps measurement has opposite sign to earth z axis
 			innovation[5] = _state.pos(2) + _gps_sample_delayed.hgt - _gps_alt_ref - _hgt_sensor_offset;
@@ -134,7 +134,7 @@ void Ekf::fuseVelPosHeight()
 			// innovation gate size
 			gate_size[5] = fmaxf(_params.baro_innov_gate, 1.0f);
 
-		} else if (_control_status.flags.rng_hgt && (_R_rng_to_earth_2_2 > _params.range_cos_max_tilt)) {
+		} else if (_control_status.rng_hgt && (_R_rng_to_earth_2_2 > _params.range_cos_max_tilt)) {
 			fuse_map[5] = true;
 			// use range finder with tilt correction
 			innovation[5] = _state.pos(2) - (-math::max(_range_sample_delayed.rng * _R_rng_to_earth_2_2,
@@ -144,7 +144,7 @@ void Ekf::fuseVelPosHeight()
 			// innovation gate size
 			gate_size[5] = fmaxf(_params.range_innov_gate, 1.0f);
 
-		} else if (_control_status.flags.ev_hgt) {
+		} else if (_control_status.ev_hgt) {
 			fuse_map[5] = true;
 			// calculate the innovation assuming the external vision observaton is in local NED frame
 			innovation[5] = _state.pos(2) - _ev_sample_delayed.posNED(2);
@@ -178,17 +178,17 @@ void Ekf::fuseVelPosHeight()
 	bool vel_check_pass = (_vel_pos_test_ratio[0] <= 1.0f) && (_vel_pos_test_ratio[1] <= 1.0f)
 			      && (_vel_pos_test_ratio[2] <= 1.0f);
 	innov_check_pass_map[2] = innov_check_pass_map[1] = innov_check_pass_map[0] = vel_check_pass;
-	bool pos_check_pass = ((_vel_pos_test_ratio[3] <= 1.0f) && (_vel_pos_test_ratio[4] <= 1.0f)) || !_control_status.flags.tilt_align;
+	bool pos_check_pass = ((_vel_pos_test_ratio[3] <= 1.0f) && (_vel_pos_test_ratio[4] <= 1.0f)) || !_control_status.tilt_align;
 	innov_check_pass_map[4] = innov_check_pass_map[3] = pos_check_pass;
-	innov_check_pass_map[5] = (_vel_pos_test_ratio[5] <= 1.0f) || !_control_status.flags.tilt_align;
+	innov_check_pass_map[5] = (_vel_pos_test_ratio[5] <= 1.0f) || !_control_status.tilt_align;
 
 	// record the successful velocity fusion event
 	if ((_fuse_hor_vel || _fuse_hor_vel_aux || _fuse_vert_vel) && vel_check_pass) {
 		_time_last_vel_fuse = _time_last_imu;
-		_innov_check_fail_status.flags.reject_vel_NED = false;
+		_innov_check_fail_status.reject_vel_NED = false;
 
 	} else if (!vel_check_pass) {
-		_innov_check_fail_status.flags.reject_vel_NED = true;
+		_innov_check_fail_status.reject_vel_NED = true;
 	}
 
 	_fuse_hor_vel = _fuse_hor_vel_aux = _fuse_vert_vel = false;
@@ -202,10 +202,10 @@ void Ekf::fuseVelPosHeight()
 			_time_last_delpos_fuse = _time_last_imu;
 		}
 
-		_innov_check_fail_status.flags.reject_pos_NE = false;
+		_innov_check_fail_status.reject_pos_NE = false;
 
 	} else if (!pos_check_pass) {
-		_innov_check_fail_status.flags.reject_pos_NE = true;
+		_innov_check_fail_status.reject_pos_NE = true;
 	}
 
 	_fuse_pos = false;
@@ -213,10 +213,10 @@ void Ekf::fuseVelPosHeight()
 	// record the successful height fusion event
 	if (innov_check_pass_map[5] && _fuse_height) {
 		_time_last_hgt_fuse = _time_last_imu;
-		_innov_check_fail_status.flags.reject_pos_D = false;
+		_innov_check_fail_status.reject_pos_D = false;
 
 	} else if (!innov_check_pass_map[5]) {
-		_innov_check_fail_status.flags.reject_pos_D = true;
+		_innov_check_fail_status.reject_pos_D = true;
 	}
 
 	_fuse_height = false;
@@ -258,43 +258,43 @@ void Ekf::fuseVelPosHeight()
 
 				// update individual measurement health status
 				if (obs_index == 0) {
-					_fault_status.flags.bad_vel_N = true;
+					_fault_status.bad_vel_N = true;
 
 				} else if (obs_index == 1) {
-					_fault_status.flags.bad_vel_E = true;
+					_fault_status.bad_vel_E = true;
 
 				} else if (obs_index == 2) {
-					_fault_status.flags.bad_vel_D = true;
+					_fault_status.bad_vel_D = true;
 
 				} else if (obs_index == 3) {
-					_fault_status.flags.bad_pos_N = true;
+					_fault_status.bad_pos_N = true;
 
 				} else if (obs_index == 4) {
-					_fault_status.flags.bad_pos_E = true;
+					_fault_status.bad_pos_E = true;
 
 				} else if (obs_index == 5) {
-					_fault_status.flags.bad_pos_D = true;
+					_fault_status.bad_pos_D = true;
 				}
 
 			} else {
 				// update individual measurement health status
 				if (obs_index == 0) {
-					_fault_status.flags.bad_vel_N = false;
+					_fault_status.bad_vel_N = false;
 
 				} else if (obs_index == 1) {
-					_fault_status.flags.bad_vel_E = false;
+					_fault_status.bad_vel_E = false;
 
 				} else if (obs_index == 2) {
-					_fault_status.flags.bad_vel_D = false;
+					_fault_status.bad_vel_D = false;
 
 				} else if (obs_index == 3) {
-					_fault_status.flags.bad_pos_N = false;
+					_fault_status.bad_pos_N = false;
 
 				} else if (obs_index == 4) {
-					_fault_status.flags.bad_pos_E = false;
+					_fault_status.bad_pos_E = false;
 
 				} else if (obs_index == 5) {
-					_fault_status.flags.bad_pos_D = false;
+					_fault_status.bad_pos_D = false;
 				}
 			}
 		}
