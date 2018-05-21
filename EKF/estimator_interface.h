@@ -273,6 +273,7 @@ public:
 			vel[i] = vel_earth(i);
 		}
 	}
+	Vector3f get_velocity() { return _output_new.vel - _vel_imu_rel_body_ned; }
 
 	// get the NED velocity derivative in earth frame
 	void get_vel_deriv_ned(float *vel_deriv)
@@ -281,6 +282,8 @@ public:
 			vel_deriv[i] = _vel_deriv_ned(i);
 		}
 	}
+
+	const Vector3f& get_vel_deriv_ned() { return _vel_deriv_ned; }
 
 	// get the derivative of the vertical position of the body frame origin in local NED earth frame
 	float get_pos_d_deriv() { return (_output_vert_new.vel_d - _vel_imu_rel_body_ned(2)); }
@@ -296,6 +299,8 @@ public:
 			pos[i] = _output_new.pos(i) - pos_offset_earth(i);
 		}
 	}
+
+	Vector3f get_position() { return _output_new.pos - (_R_to_earth_now * _params.imu_pos_body); }
 
 	// Copy the magnetic declination that we wish to save to the EKF2_MAG_DECL parameter for the next startup
 	void copy_mag_decl_deg(float *val) { *val = _mag_declination_to_save_deg; }
@@ -340,28 +345,16 @@ public:
 	virtual void get_ekf_soln_status(uint16_t *status) = 0;
 
 	// Getter for the average imu update period in s
-	float get_dt_imu_avg()
-	{
-		return _dt_imu_avg;
-	}
+	float get_dt_imu_avg() { return _dt_imu_avg; }
 
 	// Getter for the imu sample on the delayed time horizon
-	imuSample get_imu_sample_delayed()
-	{
-		return _imu_sample_delayed;
-	}
+	const imuSample& get_imu_sample_delayed() { return _imu_sample_delayed; }
 
 	// Getter for the baro sample on the delayed time horizon
-	baroSample get_baro_sample_delayed()
-	{
-		return _baro_sample_delayed;
-	}
+	const baroSample& get_baro_sample_delayed() { return _baro_sample_delayed; }
 
 	// Getter for a flag indicating if the ekf should update (completed downsampling process)
-	bool get_imu_updated()
-	{
-		return _imu_updated;
-	}
+	bool get_imu_updated() { return _imu_updated; }
 
 	void print_status();
 
@@ -424,7 +417,7 @@ protected:
 	outputVert _output_vert_delayed{};	// vertical filter output on the delayed time horizon
 	outputVert _output_vert_new{};		// vertical filter output on the non-delayed time horizon
 	imuSample _imu_sample_new{};		// imu sample capturing the newest imu data
-	Matrix3f _R_to_earth_now;		// rotation matrix from body to earth frame at current time
+	Dcmf _R_to_earth_now;		// rotation matrix from body to earth frame at current time
 	Vector3f _vel_imu_rel_body_ned;		// velocity of IMU relative to body origin in NED earth frame
 	Vector3f _vel_deriv_ned;		// velocity derivative at the IMU in NED earth frame (m/s/s)
 
@@ -443,7 +436,7 @@ protected:
 
 	// innovation consistency check monitoring ratios
 	float _yaw_test_ratio{0.0f};          // yaw innovation consistency check ratio
-	float _mag_test_ratio[3] {};      // magnetometer XYZ innovation consistency check ratios
+	//float _mag_test_ratio[3] {};      // magnetometer XYZ innovation consistency check ratios
 	float _vel_pos_test_ratio[6] {};  // velocity and position innovation consistency check ratios
 	float _tas_test_ratio{0.0f};		// tas innovation consistency check ratio
 	float _terr_test_ratio{0.0f};		// height above terrain measurement innovation consistency check ratio

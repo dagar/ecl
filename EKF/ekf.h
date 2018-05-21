@@ -113,6 +113,7 @@ public:
 
 	// get the wind velocity in m/s
 	void get_wind_velocity(float *wind);
+	const Vector2f& get_wind_velocity() { return _state.wind_vel; }
 
 	// get the wind velocity var
 	void get_wind_velocity_var(float *wind_var);
@@ -130,6 +131,11 @@ public:
 	// get the ekf WGS-84 origin position and height and the system time it was last set
 	// return true if the origin is valid
 	bool get_ekf_origin(uint64_t *origin_time, map_projection_reference_s *origin_pos, float *origin_alt);
+
+	const map_projection_reference_s& get_ekf_origin() { return _pos_ref; }
+	float get_ekf_origin_alt() { return _gps_alt_ref; }
+
+	bool ekf_origin_valid() { return _NED_origin_initialised; }
 
 	// get the 1-sigma horizontal and vertical position uncertainty of the ekf WGS-84 position
 	void get_ekf_gpos_accuracy(float *ekf_eph, float *ekf_epv);
@@ -371,7 +377,6 @@ private:
 	uint64_t _last_gps_pass_us{0};		///< last system time in usec that the GPS passed it's checks
 
 	// Variables used to publish the WGS-84 location of the EKF local NED origin
-	uint64_t _last_gps_origin_time_us{0};	///< time the origin was last set (uSec)
 	float _gps_alt_ref{0.0f};		///< WGS-84 height (m)
 
 	// Variables used to initialise the filter states

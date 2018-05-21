@@ -957,9 +957,9 @@ void Ekf::get_covariances(float *covariances)
 // return true if the origin is valid
 bool Ekf::get_ekf_origin(uint64_t *origin_time, map_projection_reference_s *origin_pos, float *origin_alt)
 {
-	memcpy(origin_time, &_last_gps_origin_time_us, sizeof(uint64_t));
 	memcpy(origin_pos, &_pos_ref, sizeof(map_projection_reference_s));
 	memcpy(origin_alt, &_gps_alt_ref, sizeof(float));
+
 	return _NED_origin_initialised;
 }
 
@@ -1131,7 +1131,7 @@ bool Ekf::reset_imu_bias()
 void Ekf::get_innovation_test_status(float *mag, float *vel, float *pos, float *hgt, float *tas, float *hagl, float *beta)
 {
 	// return the largest magnetometer innovation test ratio
-	*mag = sqrtf(math::max(_yaw_test_ratio, math::max(math::max(_mag_test_ratio[0], _mag_test_ratio[1]), _mag_test_ratio[2])));
+	//*mag = sqrtf(math::max(_yaw_test_ratio, math::max(math::max(_mag_test_ratio[0], _mag_test_ratio[1]), _mag_test_ratio[2])));
 
 	// return the largest NED velocity innovation test ratio
 	*vel = sqrtf(math::max(math::max(_vel_pos_test_ratio[0], _vel_pos_test_ratio[1]), _vel_pos_test_ratio[2]));

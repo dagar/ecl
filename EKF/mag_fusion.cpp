@@ -606,12 +606,10 @@ void Ekf::fuseHeading()
 
 	// Calculate innovation variance and Kalman gains, taking advantage of the fact that only the first 3 elements in H are non zero
 	// calculate the innovaton variance
-	float PH[4];
 	_heading_innov_var = R_YAW;
 
+	float PH[4] = {};
 	for (unsigned row = 0; row <= 3; row++) {
-		PH[row] = 0.0f;
-
 		for (uint8_t col = 0; col <= 3; col++) {
 			PH[row] += P[row][col] * H_YAW[col];
 		}
@@ -642,8 +640,6 @@ void Ekf::fuseHeading()
 	float Kfusion[_k_num_states] = {};
 
 	for (uint8_t row = 0; row <= 15; row++) {
-		Kfusion[row] = 0.0f;
-
 		for (uint8_t col = 0; col <= 3; col++) {
 			Kfusion[row] += P[row][col] * H_YAW[col];
 		}
@@ -653,8 +649,6 @@ void Ekf::fuseHeading()
 
 	if (_control_status.wind) {
 		for (uint8_t row = 22; row <= 23; row++) {
-			Kfusion[row] = 0.0f;
-
 			for (uint8_t col = 0; col <= 3; col++) {
 				Kfusion[row] += P[row][col] * H_YAW[col];
 			}
@@ -676,7 +670,7 @@ void Ekf::fuseHeading()
 	_yaw_test_ratio = sq(_heading_innov) / (sq(math::max(_params.heading_innov_gate, 1.0f)) * _heading_innov_var);
 
 	// we are no longer using 3-axis fusion so set the reported test levels to zero
-	memset(_mag_test_ratio, 0, sizeof(_mag_test_ratio));
+	//memset(_mag_test_ratio, 0, sizeof(_mag_test_ratio));
 
 	// set the magnetometer unhealthy if the test fails
 	if (_yaw_test_ratio > 1.0f) {
@@ -754,7 +748,6 @@ void Ekf::fuseHeading()
 
 		// apply the state corrections
 		fuse(Kfusion, _heading_innov);
-
 	}
 }
 
@@ -870,7 +863,6 @@ void Ekf::fuseDeclination()
 
 			// update individual measurement health status
 			_fault_status.bad_mag_decl = true;
-
 		}
 	}
 
@@ -888,6 +880,5 @@ void Ekf::fuseDeclination()
 
 		// apply the state corrections
 		fuse(Kfusion, innovation);
-
 	}
 }

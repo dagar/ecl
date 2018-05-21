@@ -427,20 +427,5 @@ struct filter_control_status {
 	bool rng_stuck = false;			///< 21 - true when rng data wasn't ready for more than 10s and new rng values haven't changed enough
 };
 
-struct solution_status {
-	bool attitude = false;			///< 0 - True if the attitude estimate is good
-	bool velocity_horiz = false;		///< 1 - True if the horizontal velocity estimate is good
-	bool velocity_vert = false;		///< 2 - True if the vertical velocity estimate is good
-	bool pos_horiz_rel = false;		///< 3 - True if the horizontal position (relative) estimate is good
-	bool pos_horiz_abs = false;		///< 4 - True if the horizontal position (absolute) estimate is good
-	bool pos_vert_abs = false;		///< 5 - True if the vertical position (absolute) estimate is good
-	bool pos_vert_agl = false;		///< 6 - True if the vertical position (above ground) estimate is good
-	bool const_pos_mode = false;		///< 7 - True if the EKF is in a constant position mode and is not using external measurements (eg GPS or optical flow)
-	bool pred_pos_horiz_rel = false;	///< 8 - True if the EKF has sufficient data to enter a mode that will provide a (relative) position estimate
-	bool pred_pos_horiz_abs = false;	///< 9 - True if the EKF has sufficient data to enter a mode that will provide a (absolute) position estimate
-	bool gps_glitch = false;		///< 10 - True if the EKF has detected a GPS glitch
-	bool accel_error = false;		///< 11 - True if the EKF has detected bad accelerometer data
-};
-
 } // namespace estimator
 
