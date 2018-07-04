@@ -99,6 +99,8 @@ bool Ekf::init(uint64_t timestamp)
 
 bool Ekf::update()
 {
+	bool updated = false;
+
 	if (!_filter_initialised) {
 		_filter_initialised = initialiseFilter();
 
@@ -120,19 +122,14 @@ bool Ekf::update()
 		// run a separate filter for terrain estimation
 		runTerrainEstimator();
 
+		updated = true;
 	}
 
 	// the output observer always runs
 	// Use full rate IMU data at the current time horizon
 	calculateOutputStates();
 
-	// check for NaN or inf on attitude states
-	if (!ISFINITE(_state.quat_nominal(0)) || !ISFINITE(_output_new.quat_nominal(0))) {
-		return false;
-	}
-
-	// We don't have valid data to output until tilt and yaw alignment is complete
-	return _control_status.flags.tilt_align && _control_status.flags.yaw_align;
+	return updated;
 }
 
 bool Ekf::initialiseFilter()
@@ -455,7 +452,7 @@ void Ekf::calculateOutputStates()
 	const float dt_scale_correction = _dt_imu_avg / _dt_ekf_avg;
 
 	// Apply corrections to the delta angle required to track the quaternion states at the EKF fusion time horizon
-	const Vector3f delta_angle{(imu.delta_ang - _state.gyro_bias) * dt_scale_correction + _delta_angle_corr};
+	const Vector3f delta_angle{imu.delta_ang - _state.gyro_bias * dt_scale_correction + _delta_angle_corr};
 
 	// calculate a yaw change about the earth frame vertical
 	const float spin_del_ang_D = _R_to_earth_now(2, 0) * delta_angle(0) +
@@ -482,12 +479,12 @@ void Ekf::calculateOutputStates()
 	_R_to_earth_now = quat_to_invrotmat(_output_new.quat_nominal);
 
 	// correct delta velocity for bias offsets
-	const Vector3f delta_vel{(imu.delta_vel - _state.accel_bias) * dt_scale_correction};
+	const Vector3f delta_vel{imu.delta_vel - _state.accel_bias * dt_scale_correction};
 
 	// rotate the delta velocity to earth frame
 	Vector3f delta_vel_NED{_R_to_earth_now * delta_vel};
 
-	// corrrect for measured accceleration due to gravity
+	// correct for measured acceleration due to gravity
 	delta_vel_NED(2) += CONSTANTS_ONE_G * imu.delta_vel_dt;
 
 	// calculate the earth frame velocity derivatives
@@ -663,4 +660,18 @@ void Ekf::calculateOutputStates()
 			_output_new = _output_buffer.get_newest();
 		}
 	}
+}
+
+/*
+ * Predict the previous quaternion output state forward using the latest IMU delta angle data.
+*/
+Quatf Ekf::calculate_quaternion() const
+{
+	// Correct delta angle data for bias errors using bias state estimates from the EKF and also apply
+	// corrections required to track the EKF quaternion states
+	const Vector3f delta_angle{_imu_sample_new.delta_ang - _state.gyro_bias * (_dt_imu_avg / _dt_ekf_avg) + _delta_angle_corr};
+
+	// convert the delta angle to an equivalent delta quaternions
+	// the quaternions must always be normalised after modification
+	return Quatf{_output_new.quat_nominal * AxisAnglef{delta_angle}}.unit();
 }

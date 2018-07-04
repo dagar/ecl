@@ -365,10 +365,7 @@ public:
 	virtual void get_ekf_soln_status(uint16_t *status) = 0;
 
 	// Getter for the average imu update period in s
-	float get_dt_imu_avg()
-	{
-		return _dt_imu_avg;
-	}
+	float get_dt_imu_avg() const { return _dt_imu_avg; }
 
 	// Getter for the imu sample on the delayed time horizon
 	imuSample get_imu_sample_delayed()
