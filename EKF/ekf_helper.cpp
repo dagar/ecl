@@ -89,8 +89,8 @@ bool Ekf::resetVelocity()
 		}
 
 		// reset the velocity covariance terms
-		zeroRows(P, 4, 5);
-		zeroCols(P, 4, 5);
+		zeroRows(4, 5);
+		zeroCols(4, 5);
 
 		// reset the horizontal velocity variance using the optical flow noise variance
 		P[5][5] = P[4][4] = sq(range) * calcOptFlowMeasVar();
@@ -227,8 +227,8 @@ void Ekf::resetHeight()
 			_state.pos(2) = new_pos_down;
 
 			// reset the associated covariance values
-			zeroRows(P, 9, 9);
-			zeroCols(P, 9, 9);
+			zeroRows(9, 9);
+			zeroCols(9, 9);
 
 			// the state variance is the same as the observation
 			P[9][9] = sq(_params.range_noise);
@@ -252,8 +252,8 @@ void Ekf::resetHeight()
 			_state.pos(2) = _hgt_sensor_offset - baro_newest.hgt + _baro_hgt_offset;
 
 			// reset the associated covariance values
-			zeroRows(P, 9, 9);
-			zeroCols(P, 9, 9);
+			zeroRows(9, 9);
+			zeroCols(9, 9);
 
 			// the state variance is the same as the observation
 			P[9][9] = sq(_params.baro_noise);
@@ -270,8 +270,8 @@ void Ekf::resetHeight()
 			_state.pos(2) = _hgt_sensor_offset - gps_newest.hgt + _gps_alt_ref;
 
 			// reset the associated covarince values
-			zeroRows(P, 9, 9);
-			zeroCols(P, 9, 9);
+			zeroRows(9, 9);
+			zeroCols(9, 9);
 
 			// the state variance is the same as the observation
 			P[9][9] = sq(gps_newest.hacc);
@@ -306,8 +306,8 @@ void Ekf::resetHeight()
 	}
 
 	// reset the vertical velocity covariance values
-	zeroRows(P, 6, 6);
-	zeroCols(P, 6, 6);
+	zeroRows(6, 6);
+	zeroCols(6, 6);
 
 	// reset the vertical velocity state
 	if (_control_status.flags.gps && (_time_last_imu - gps_newest.time_us < 2 * GPS_MAX_INTERVAL)) {
@@ -488,8 +488,8 @@ bool Ekf::realignYawGPS()
 			initialiseQuatCovariances(angle_err_var_vec);
 
 			// reset the corresponding rows and columns in the covariance matrix and set the variances on the magnetic field states to the measurement variance
-			zeroRows(P, 16, 21);
-			zeroCols(P, 16, 21);
+			zeroRows(16, 21);
+			zeroCols(16, 21);
 
 			for (uint8_t index = 16; index <= 21; index ++) {
 				P[index][index] = sq(_params.mag_noise);
@@ -522,8 +522,8 @@ bool Ekf::realignYawGPS()
 			_state.mag_I = _R_to_earth * _mag_sample_delayed.mag;
 
 			// reset the corresponding rows and columns in the covariance matrix and set the variances on the magnetic field states to the measurement variance
-			zeroRows(P, 16, 21);
-			zeroCols(P, 16, 21);
+			zeroRows(16, 21);
+			zeroCols(16, 21);
 
 			for (uint8_t index = 16; index <= 21; index ++) {
 				P[index][index] = sq(_params.mag_noise);
@@ -663,8 +663,8 @@ bool Ekf::resetMagHeading(Vector3f &mag_init)
 	_state.mag_I = _R_to_earth_after * mag_init;
 
 	// reset the corresponding rows and columns in the covariance matrix and set the variances on the magnetic field states to the measurement variance
-	zeroRows(P, 16, 21);
-	zeroCols(P, 16, 21);
+	zeroRows(16, 21);
+	zeroCols(16, 21);
 
 	for (uint8_t index = 16; index <= 21; index ++) {
 		P[index][index] = sq(_params.mag_noise);
@@ -1131,8 +1131,8 @@ bool Ekf::reset_imu_bias()
 	_state.accel_bias.zero();
 
 	// Zero the corresponding covariances
-	zeroCols(P, 10, 15);
-	zeroRows(P, 10, 15);
+	zeroCols(10, 15);
+	zeroRows(10, 15);
 
 	// Set the corresponding variances to the values use for initial alignment
 	float dt = FILTER_UPDATE_PERIOD_S;
@@ -1474,8 +1474,8 @@ void Ekf::initialiseQuatCovariances(Vector3f &rot_vec_var)
 		float t44 = t17-t36;
 
 		// zero all the quaternion covariances
-		zeroRows(P, 0, 3);
-		zeroCols(P, 0, 3);
+		zeroRows(0, 3);
+		zeroCols(0, 3);
 
 		// Update the quaternion internal covariances using auto-code generated using matlab symbolic toolbox
 		P[0][0] = rot_vec_var(0)*t2*t9*t10*0.25f+rot_vec_var(1)*t4*t9*t10*0.25f+rot_vec_var(2)*t5*t9*t10*0.25f;

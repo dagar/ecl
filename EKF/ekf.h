@@ -629,9 +629,21 @@ private:
 
 	// zero the specified range of rows in the state covariance matrix
 	void zeroRows(float (&cov_mat)[_k_num_states][_k_num_states], uint8_t first, uint8_t last);
+	void zeroRows(int first, int last)
+	{
+		for (int row = first; row <= last; row++) {
+			memset(&P[row][0], 0, sizeof(P[0][0]) * _k_num_states);
+		}
+	}
 
 	// zero the specified range of columns in the state covariance matrix
 	void zeroCols(float (&cov_mat)[_k_num_states][_k_num_states], uint8_t first, uint8_t last);
+	void zeroCols(int first, int last)
+	{
+		for (int row = 0; row < _k_num_states; row++) {
+			memset(&P[row][first], 0, sizeof(P[0][0]) * (1 + last - first));
+		}
+	}
 
 	// zero the specified range of off diagonals in the state covariance matrix
 	void zeroOffDiag(float (&cov_mat)[_k_num_states][_k_num_states], uint8_t first, uint8_t last);
