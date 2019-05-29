@@ -54,8 +54,9 @@ void Ekf::initialiseCovariance()
 		}
 	}
 
-	_delta_angle_bias_var_accum.setZero();
-	_delta_vel_bias_var_accum.setZero();
+	for (float& pn : _process_noise_var_accum) {
+		pn = 0.0f;
+	}
 
 	// calculate average prediction time step in sec
 	float dt = FILTER_UPDATE_PERIOD_S;
@@ -433,15 +434,10 @@ void Ekf::predictCovariance()
 	nextP[12][12] = P[12][12];
 
 	// add process noise that is not from the IMU
-	for (unsigned i = 0; i <= 9; i++) {
-		nextP[i][i] += process_noise[i];
-	}
-
 	// process noise contribution for delta angle states can be very small compared to
 	// the variances, therefore use algorithm to minimise numerical error
-	for (unsigned i = 10; i <= 12; i++) {
-		const int index = i-10;
-		nextP[i][i] = kahanSummation(nextP[i][i], process_noise[i], _delta_angle_bias_var_accum(index));
+	for (unsigned i = 0; i <= 12; i++) {
+		nextP[i][i] = kahanSummation(nextP[i][i], process_noise[i], _process_noise_var_accum[i]);
 	}
 
 	// Don't calculate these covariance terms if IMU delta velocity bias estimation is inhibited
@@ -498,15 +494,17 @@ void Ekf::predictCovariance()
 		// process noise contributiton for delta velocity states can be very small compared to
 		// the variances, therefore use algorithm to minimise numerical error
 		for (unsigned i = 13; i <= 15; i++) {
-			const int index = i-13;
-			nextP[i][i] = kahanSummation(nextP[i][i], process_noise[i], _delta_vel_bias_var_accum(index));
+			nextP[i][i] = kahanSummation(nextP[i][i], process_noise[i], _process_noise_var_accum[i]);
 		}
 
 	} else {
 		// Inhibit delta velocity bias learning by zeroing the covariance terms
 		zeroRows(nextP, 13, 15);
 		zeroCols(nextP, 13, 15);
-		_delta_vel_bias_var_accum.setZero();
+
+		for (unsigned i = 13; i <= 15; i++) {
+			_process_noise_var_accum[i] = 0.0f;
+		}
 	}
 
 	// Don't do covariance prediction on magnetic field states unless we are using 3-axis fusion

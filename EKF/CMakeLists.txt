@@ -55,8 +55,6 @@ target_link_libraries(ecl_EKF PRIVATE ecl_geo ecl_geo_lookup mathlib)
 
 set_target_properties(ecl_EKF PROPERTIES PUBLIC_HEADER "ekf.h")
 
-set_source_files_properties(ekf_helper.cpp PROPERTIES COMPILE_FLAGS -fassociative-math)
-
 if(EKF_PYTHON_TESTS)
 	add_subdirectory(swig)
 endif()

@@ -363,8 +363,7 @@ private:
 
 	float P[_k_num_states][_k_num_states] {};	///< state covariance matrix
 
-	Vector3f _delta_vel_bias_var_accum;		///< kahan summation algorithm accumulator for delta velocity bias variance
-	Vector3f _delta_angle_bias_var_accum;	///< kahan summation algorithm accumulator for delta angle bias variance
+	float _process_noise_var_accum[_k_num_states]{}; ///< kahan summation algorithm accumulator
 
 	float _vel_pos_innov[6] {};	///< NED velocity and position innovations: 0-2 vel (m/sec),  3-5 pos (m)
 	float _vel_pos_innov_var[6] {};	///< NED velocity and position innovation variances: 0-2 vel ((m/sec)**2), 3-5 pos (m**2)
