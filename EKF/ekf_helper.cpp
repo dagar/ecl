@@ -1723,7 +1723,8 @@ void Ekf::save_mag_cov_data()
 	}
 }
 
-float Ekf::kahanSummation(float sum_previous, float input, float &accumulator) {
+float Ekf::kahanSummation(float sum_previous, float input, float &accumulator) const
+{
 	float y = input - accumulator;
 	float t = sum_previous + y;
 	accumulator = (t - sum_previous) - y;

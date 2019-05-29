@@ -714,6 +714,6 @@ private:
 	// This function relies on the caller to be responsible for keeping a copy of
 	// "accumulator" and passing this value at the next iteration.
 	// Ref: https://en.wikipedia.org/wiki/Kahan_summation_algorithm
-	float kahanSummation(float sum_previous, float input, float &accumulator);
+	float kahanSummation(float sum_previous, float input, float &accumulator) const;
 
 };

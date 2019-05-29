@@ -434,12 +434,12 @@ void Ekf::predictCovariance()
 
 	// add process noise that is not from the IMU
 	for (unsigned i = 0; i <= 9; i++) {
-			nextP[i][i] += process_noise[i];
+		nextP[i][i] += process_noise[i];
 	}
 
 	// process noise contribution for delta angle states can be very small compared to
 	// the variances, therefore use algorithm to minimise numerical error
-	for (unsigned i = 10; i <=12; i++) {
+	for (unsigned i = 10; i <= 12; i++) {
 		const int index = i-10;
 		nextP[i][i] = kahanSummation(nextP[i][i], process_noise[i], _delta_angle_bias_var_accum(index));
 	}
