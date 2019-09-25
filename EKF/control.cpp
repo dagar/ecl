@@ -93,6 +93,9 @@ void Ekf::controlFusionModes()
 	const rangeSample &rng_init = _range_buffer.get_newest();
 	_rng_hgt_faulty = !((_time_last_imu - rng_init.time_us) < 2 * RNG_MAX_INTERVAL);
 
+	const extVisionSample &ev_init = _ext_vision_buffer.get_newest();
+	_ev_hgt_faulty = !((_time_last_imu - ev_init.time_us) < 2 * EV_MAX_INTERVAL);
+
 	// check for arrival of new sensor data at the fusion time horizon
 	_gps_data_ready = _gps_buffer.pop_first_older_than(_imu_sample_delayed.time_us, &_gps_sample_delayed);
 	_mag_data_ready = _mag_buffer.pop_first_older_than(_imu_sample_delayed.time_us, &_mag_sample_delayed);
@@ -933,44 +936,43 @@ void Ekf::controlHeightFusion()
 				_hgt_sensor_offset = _gps_sample_delayed.hgt - _gps_alt_ref + _state.pos(2);
 			}
 		}
-	}
 
-	// set the height data source to range if requested
-	if ((_params.vdist_sensor_type == VDIST_SENSOR_RANGE) && !_rng_hgt_faulty) {
-		setControlRangeHeight();
-		_fuse_height = _range_data_ready;
+	} else if (_params.vdist_sensor_type == VDIST_SENSOR_RANGE) {
 
-		// we have just switched to using range finder, calculate height sensor offset such that current
-		// measurment matches our current height estimate
-		if (_control_status_prev.flags.rng_hgt != _control_status.flags.rng_hgt) {
-			// use the parameter rng_gnd_clearance if on ground to avoid a noisy offset initialization (e.g. sonar)
-			if (_control_status.flags.in_air && get_terrain_valid()) {
+		if (!_rng_hgt_faulty) {
+			setControlRangeHeight();
+			_fuse_height = _range_data_ready;
 
-				_hgt_sensor_offset = _terrain_vpos;
+			// we have just switched to using range finder, calculate height sensor offset such that current
+			// measurment matches our current height estimate
+			if (_control_status_prev.flags.rng_hgt != _control_status.flags.rng_hgt) {
+				// use the parameter rng_gnd_clearance if on ground to avoid a noisy offset initialization (e.g. sonar)
+				if (_control_status.flags.in_air && get_terrain_valid()) {
 
-			} else if (_control_status.flags.in_air) {
+					_hgt_sensor_offset = _terrain_vpos;
 
-				_hgt_sensor_offset = _R_rng_to_earth_2_2 * _range_sample_delayed.rng + _state.pos(2);
+				} else if (_control_status.flags.in_air) {
 
-			} else {
+					_hgt_sensor_offset = _R_rng_to_earth_2_2 * _range_sample_delayed.rng + _state.pos(2);
 
-				_hgt_sensor_offset = _params.rng_gnd_clearance;
+				} else {
+
+					_hgt_sensor_offset = _params.rng_gnd_clearance;
+				}
+			}
+
+		} else if (_baro_data_ready && !_baro_hgt_faulty) {
+			setControlBaroHeight();
+			_fuse_height = true;
+
+			// we have just switched to using baro height, we don't need to set a height sensor offset
+			// since we track a separate _baro_hgt_offset
+			if (_control_status_prev.flags.baro_hgt != _control_status.flags.baro_hgt) {
+				_hgt_sensor_offset = 0.0f;
 			}
 		}
 
-	} else if ((_params.vdist_sensor_type == VDIST_SENSOR_RANGE) && _baro_data_ready && !_baro_hgt_faulty) {
-		setControlBaroHeight();
-		_fuse_height = true;
-
-		// we have just switched to using baro height, we don't need to set a height sensor offset
-		// since we track a separate _baro_hgt_offset
-		if (_control_status_prev.flags.baro_hgt != _control_status.flags.baro_hgt) {
-			_hgt_sensor_offset = 0.0f;
-		}
-	}
-
-	// Determine if GPS should be used as the height source
-	if (_params.vdist_sensor_type == VDIST_SENSOR_GPS) {
+	} else if (_params.vdist_sensor_type == VDIST_SENSOR_GPS) {
 
 		if (_range_aid_mode_selected && _range_data_ready && !_rng_hgt_faulty) {
 			setControlRangeHeight();
@@ -1007,11 +1009,35 @@ void Ekf::controlHeightFusion()
 				_hgt_sensor_offset = 0.0f;
 			}
 		}
-	}
 
-	// Determine if we rely on EV height but switched to baro
-	if (_params.vdist_sensor_type == VDIST_SENSOR_EV) {
-		if (_control_status.flags.baro_hgt && _baro_data_ready && !_baro_hgt_faulty) {
+	} else if (_params.vdist_sensor_type == VDIST_SENSOR_EV) {
+
+		if (_range_aid_mode_selected && _range_data_ready && !_rng_hgt_faulty) {
+			setControlRangeHeight();
+			_fuse_height = true;
+
+			// we have just switched to using range finder, calculate height sensor offset such that current
+			// measurment matches our current height estimate
+			if (_control_status_prev.flags.rng_hgt != _control_status.flags.rng_hgt) {
+				if (get_terrain_valid()) {
+					_hgt_sensor_offset = _terrain_vpos;
+
+				} else {
+					_hgt_sensor_offset = _R_rng_to_earth_2_2 * _range_sample_delayed.rng + _state.pos(2);
+				}
+			}
+
+		} else if (!_range_aid_mode_selected && _ev_data_ready && !_ev_hgt_faulty) {
+			setControlEVHeight();
+			_fuse_height = true;
+
+			// we have just switched to using vision height, calculate height sensor offset such that current
+			// measurment matches our current height estimate
+			if (_control_status_prev.flags.ev_hgt != _control_status.flags.ev_hgt) {
+				_hgt_sensor_offset = -_ev_sample_delayed.posNED(2) + _state.pos(2);
+			}
+
+		} else if (_control_status.flags.baro_hgt && _baro_data_ready && !_baro_hgt_faulty) {
 			// switch to baro if there was a reset to baro
 			_fuse_height = true;
 
@@ -1021,6 +1047,7 @@ void Ekf::controlHeightFusion()
 				_hgt_sensor_offset = 0.0f;
 			}
 		}
+
 	}
 
 	// calculate a filtered offset between the baro origin and local NED origin if we are not using the baro as a height reference

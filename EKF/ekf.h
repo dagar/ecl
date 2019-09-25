@@ -427,7 +427,8 @@ private:
 	// height sensor fault status
 	bool _baro_hgt_faulty{false};		///< true if valid baro data is unavailable for use
 	bool _gps_hgt_faulty{false};		///< true if valid gps height data is unavailable for use
-	bool _rng_hgt_faulty{false};		///< true if valid rnage finder height data is unavailable for use
+	bool _rng_hgt_faulty{false};		///< true if valid range finder height data is unavailable for use
+	bool _ev_hgt_faulty{false};			///< true if valid vision height data is unavailable for use
 	int _primary_hgt_source{VDIST_SENSOR_BARO};	///< specifies primary source of height data
 
 	// imu fault status
