@@ -287,10 +287,10 @@ void Ekf::resetHeight()
 		vert_pos_reset = true;
 
 		if (std::abs(dt_newest) < std::abs(dt_delayed)) {
-			_state.pos(2) = ev_newest.pos(2);
+			_state.pos(2) = _hgt_sensor_offset - ev_newest.pos(2);
 
 		} else {
-			_state.pos(2) = _ev_sample_delayed.pos(2);
+			_state.pos(2) = _hgt_sensor_offset - _ev_sample_delayed.pos(2);
 		}
 
 	}

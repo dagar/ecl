@@ -52,7 +52,7 @@ using ecl_abstime = hrt_abstime;
 #define ECL_ERR	 PX4_ERR
 
 #if defined(__PX4_POSIX)
-#define ECL_INFO_TIMESTAMPED(X) PX4_INFO("%llu: " X, (unsigned long long)_imu_sample_delayed.time_us)
+#define ECL_INFO_TIMESTAMPED(X) PX4_INFO("%.3f: " X, (double)_imu_sample_delayed.time_us / 1e6)
 #define ECL_WARN_TIMESTAMPED(X) PX4_WARN("%llu: " X, (unsigned long long)_imu_sample_delayed.time_us)
 #define ECL_ERR_TIMESTAMPED(X) PX4_ERR("%llu: " X, (unsigned long long)_imu_sample_delayed.time_us)
 #else
