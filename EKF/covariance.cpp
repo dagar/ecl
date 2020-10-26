@@ -100,17 +100,6 @@ void Ekf::initialiseCovariance()
 	// wind
 	P(22,22) = sq(_params.initial_wind_uncertainty);
 	P(23,23) = P(22,22);
-
-}
-
-Vector3f Ekf::getPositionVariance() const
-{
-	return P.slice<3,3>(7,7).diag();
-}
-
-Vector3f Ekf::getVelocityVariance() const
-{
-	return P.slice<3,3>(4,4).diag();
 }
 
 void Ekf::predictCovariance()

@@ -161,16 +161,6 @@ void Ekf::fuseAirspeed()
 	}
 }
 
-Vector2f Ekf::getWindVelocity() const
-{
-	return _state.wind_vel;
-}
-
-Vector2f Ekf::getWindVelocityVariance() const
-{
-	return P.slice<2, 2>(22,22).diag();
-}
-
 void Ekf::get_true_airspeed(float *tas)
 {
 	const float tempvar = sqrtf(sq(_state.vel(0) - _state.wind_vel(0)) + sq(_state.vel(1) - _state.wind_vel(1)) + sq(_state.vel(2)));

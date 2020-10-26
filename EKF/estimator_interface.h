@@ -68,78 +68,9 @@ public:
 
 	virtual bool update() = 0;
 
-	virtual void getGpsVelPosInnov(float hvel[2], float &vvel, float hpos[2], float &vpos) const = 0;
-	virtual void getGpsVelPosInnovVar(float hvel[2], float &vvel, float hpos[2], float &vpos) const = 0;
-	virtual void getGpsVelPosInnovRatio(float &hvel, float &vvel, float &hpos, float &vpos) const = 0;
-
-	virtual void getEvVelPosInnov(float hvel[2], float &vvel, float hpos[2], float &vpos) const = 0;
-	virtual void getEvVelPosInnovVar(float hvel[2], float &vvel, float hpos[2], float &vpos) const = 0;
-	virtual void getEvVelPosInnovRatio(float &hvel, float &vvel, float &hpos, float &vpos) const = 0;
-
-	virtual void getBaroHgtInnov(float &baro_hgt_innov) const = 0;
-	virtual void getBaroHgtInnovVar(float &baro_hgt_innov_var) const = 0;
-	virtual void getBaroHgtInnovRatio(float &baro_hgt_innov_ratio) const = 0;
-
-	virtual void getRngHgtInnov(float &rng_hgt_innov) const = 0;
-	virtual void getRngHgtInnovVar(float &rng_hgt_innov_var) const = 0;
-	virtual void getRngHgtInnovRatio(float &rng_hgt_innov_ratio) const = 0;
-
-	virtual void getAuxVelInnov(float aux_vel_innov[2]) const = 0;
-	virtual void getAuxVelInnovVar(float aux_vel_innov[2]) const = 0;
-	virtual void getAuxVelInnovRatio(float &aux_vel_innov_ratio) const = 0;
-
-	virtual void getFlowInnov(float flow_innov[2]) const = 0;
-	virtual void getFlowInnovVar(float flow_innov_var[2]) const = 0;
-	virtual void getFlowInnovRatio(float &flow_innov_ratio) const = 0;
-	virtual const Vector2f &getFlowVelBody() const = 0;
-	virtual const Vector2f &getFlowVelNE() const = 0;
-	virtual const Vector2f &getFlowCompensated() const = 0;
-	virtual const Vector2f &getFlowUncompensated() const = 0;
-	virtual const Vector3f &getFlowGyro() const = 0;
-
-	virtual void getHeadingInnov(float &heading_innov) const = 0;
-	virtual void getHeadingInnovVar(float &heading_innov_var) const = 0;
-	virtual void getHeadingInnovRatio(float &heading_innov_ratio) const = 0;
-
-	virtual void getMagInnov(float mag_innov[3]) const = 0;
-	virtual void getMagInnovVar(float mag_innov_var[3]) const = 0;
-	virtual void getMagInnovRatio(float &mag_innov_ratio) const = 0;
-
-	virtual void getDragInnov(float drag_innov[2]) const = 0;
-	virtual void getDragInnovVar(float drag_innov_var[2]) const = 0;
-	virtual void getDragInnovRatio(float drag_innov_ratio[2]) const = 0;
-
-	virtual void getAirspeedInnov(float &airspeed_innov) const = 0;
-	virtual void getAirspeedInnovVar(float &get_airspeed_innov_var) const = 0;
-	virtual void getAirspeedInnovRatio(float &airspeed_innov_ratio) const = 0;
-
-	virtual void getBetaInnov(float &beta_innov) const = 0;
-	virtual void getBetaInnovVar(float &get_beta_innov_var) const = 0;
-	virtual void getBetaInnovRatio(float &beta_innov_ratio) const = 0;
-
-	virtual void getHaglInnov(float &hagl_innov) const = 0;
-	virtual void getHaglInnovVar(float &hagl_innov_var) const = 0;
-	virtual void getHaglInnovRatio(float &hagl_innov_ratio) const = 0;
-
 	virtual matrix::Vector<float, 24> getStateAtFusionHorizonAsVector() const = 0;
 
-	virtual Vector2f getWindVelocity() const = 0;
-
-	virtual Vector2f getWindVelocityVariance() const = 0;
-
 	virtual void get_true_airspeed(float *tas) = 0;
-
-	// return an array containing the output predictor angular, velocity and position tracking
-	// error magnitudes (rad), (m/s), (m)
-	virtual Vector3f getOutputTrackingError() const = 0;
-
-	/*
-	Returns  following IMU vibration metrics in the following array locations
-	0 : Gyro delta angle coning metric = filtered length of (delta_angle x prev_delta_angle)
-	1 : Gyro high frequency vibe = filtered length of (delta_angle - prev_delta_angle)
-	2 : Accel high frequency vibe = filtered length of (delta_velocity - prev_delta_velocity)
-	*/
-	virtual Vector3f getImuVibrationMetrics() const = 0;
 
 	/*
 	First argument returns GPS drift  metrics in the following array locations
@@ -271,7 +202,7 @@ public:
 	int getNumberOfActiveHorizontalAidingSources() const;
 
 	// return true if the EKF is dead reckoning the position using inertial data only
-	bool inertial_dead_reckoning() {return _is_dead_reckoning;}
+	bool inertial_dead_reckoning() { return _is_dead_reckoning; }
 
 	virtual bool isTerrainEstimateValid() const = 0;
 	//[[deprecated("Replaced by isTerrainEstimateValid")]]
@@ -279,16 +210,10 @@ public:
 
 	virtual uint8_t getTerrainEstimateSensorBitfield() const = 0;
 
-	// get the estimated terrain vertical position relative to the NED origin
-	virtual float getTerrainVertPos() const = 0;
-
 	// return true if the local position estimate is valid
 	bool local_position_is_valid();
 
-	const matrix::Quatf getQuaternion() const { return _output_new.quat_nominal; }
-
-	// return the quaternion defining the rotation from the EKF to the External Vision reference frame
-	virtual matrix::Quatf getVisionAlignmentQuaternion() const = 0;
+	const matrix::Quatf &getQuaternion() const { return _output_new.quat_nominal; }
 
 	// get the velocity of the body frame origin in local NED earth frame
 	Vector3f getVelocity() const
@@ -297,19 +222,11 @@ public:
 		return vel_earth;
 	}
 
-	virtual Vector3f getVelocityVariance() const = 0;
-
 	// get the velocity derivative in earth frame
-	Vector3f getVelocityDerivative() const
-	{
-		return _vel_deriv;
-	}
+	const Vector3f &getVelocityDerivative() const { return _vel_deriv; }
 
 	// get the derivative of the vertical position of the body frame origin in local NED earth frame
-	float getVerticalPositionDerivative() const
-	{
-		return _output_vert_new.vert_vel - _vel_imu_rel_body_ned(2);
-	}
+	float getVerticalPositionDerivative() const { return _output_vert_new.vert_vel - _vel_imu_rel_body_ned(2); }
 
 	// get the position of the body frame origin in local earth frame
 	Vector3f getPosition() const
@@ -319,8 +236,6 @@ public:
 		// subtract from the EKF position (which is at the IMU) to get position at the body origin
 		return _output_new.pos - pos_offset_earth;
 	}
-
-	virtual Vector3f getPositionVariance() const = 0;
 
 	// Get the value of magnetic declination in degrees to be saved for use at the next startup
 	// Returns true when the declination can be saved
@@ -378,7 +293,8 @@ public:
 	// Innovation Test Ratios - these are the ratio of the innovation to the acceptance threshold.
 	// A value > 1 indicates that the sensor measurement has exceeded the maximum acceptable level and has been rejected by the EKF
 	// Where a measurement type is a vector quantity, eg magnetometer, GPS position, etc, the maximum value is returned.
-	virtual void get_innovation_test_status(uint16_t &status, float &mag, float &vel, float &pos, float &hgt, float &tas, float &hagl, float &beta) = 0;
+	virtual void get_innovation_test_status(uint16_t &status, float &mag, float &vel, float &pos, float &hgt, float &tas,
+						float &hagl, float &beta) = 0;
 
 	// return a bitmask integer that describes which state estimates can be used for flight control
 	virtual void get_ekf_soln_status(uint16_t *status) = 0;

@@ -69,67 +69,67 @@ public:
 	// should be called every time new data is pushed into the filter
 	bool update() override;
 
-	void getGpsVelPosInnov(float hvel[2], float &vvel, float hpos[2], float &vpos) const override;
-	void getGpsVelPosInnovVar(float hvel[2], float &vvel, float hpos[2], float &vpos) const override;
-	void getGpsVelPosInnovRatio(float &hvel, float &vvel, float &hpos, float &vpos) const override;
+	void getGpsVelPosInnov(float hvel[2], float &vvel, float hpos[2], float &vpos) const;
+	void getGpsVelPosInnovVar(float hvel[2], float &vvel, float hpos[2], float &vpos) const;
+	void getGpsVelPosInnovRatio(float &hvel, float &vvel, float &hpos, float &vpos) const;
 
-	void getEvVelPosInnov(float hvel[2], float &vvel, float hpos[2], float &vpos) const override;
-	void getEvVelPosInnovVar(float hvel[2], float &vvel, float hpos[2], float &vpos) const override;
-	void getEvVelPosInnovRatio(float &hvel, float &vvel, float &hpos, float &vpos) const override;
+	void getEvVelPosInnov(float hvel[2], float &vvel, float hpos[2], float &vpos) const;
+	void getEvVelPosInnovVar(float hvel[2], float &vvel, float hpos[2], float &vpos) const;
+	void getEvVelPosInnovRatio(float &hvel, float &vvel, float &hpos, float &vpos) const;
 
-	void getBaroHgtInnov(float &baro_hgt_innov) const override { baro_hgt_innov = _baro_hgt_innov(2); }
-	void getBaroHgtInnovVar(float &baro_hgt_innov_var) const override { baro_hgt_innov_var = _baro_hgt_innov_var(2); }
-	void getBaroHgtInnovRatio(float &baro_hgt_innov_ratio) const override { baro_hgt_innov_ratio = _baro_hgt_test_ratio(1); }
+	void getBaroHgtInnov(float &baro_hgt_innov) const { baro_hgt_innov = _baro_hgt_innov(2); }
+	void getBaroHgtInnovVar(float &baro_hgt_innov_var) const { baro_hgt_innov_var = _baro_hgt_innov_var(2); }
+	void getBaroHgtInnovRatio(float &baro_hgt_innov_ratio) const { baro_hgt_innov_ratio = _baro_hgt_test_ratio(1); }
 
-	void getRngHgtInnov(float &rng_hgt_innov) const override { rng_hgt_innov = _rng_hgt_innov(2); }
-	void getRngHgtInnovVar(float &rng_hgt_innov_var) const override { rng_hgt_innov_var = _rng_hgt_innov_var(2); }
-	void getRngHgtInnovRatio(float &rng_hgt_innov_ratio) const override { rng_hgt_innov_ratio = _rng_hgt_test_ratio(1); }
+	void getRngHgtInnov(float &rng_hgt_innov) const { rng_hgt_innov = _rng_hgt_innov(2); }
+	void getRngHgtInnovVar(float &rng_hgt_innov_var) const { rng_hgt_innov_var = _rng_hgt_innov_var(2); }
+	void getRngHgtInnovRatio(float &rng_hgt_innov_ratio) const { rng_hgt_innov_ratio = _rng_hgt_test_ratio(1); }
 
-	void getAuxVelInnov(float aux_vel_innov[2]) const override;
-	void getAuxVelInnovVar(float aux_vel_innov[2]) const override;
-	void getAuxVelInnovRatio(float &aux_vel_innov_ratio) const override { aux_vel_innov_ratio = _aux_vel_test_ratio(0); }
+	void getAuxVelInnov(float aux_vel_innov[2]) const;
+	void getAuxVelInnovVar(float aux_vel_innov[2]) const;
+	void getAuxVelInnovRatio(float &aux_vel_innov_ratio) const { aux_vel_innov_ratio = _aux_vel_test_ratio(0); }
 
-	void getFlowInnov(float flow_innov[2]) const override { _flow_innov.copyTo(flow_innov); }
-	void getFlowInnovVar(float flow_innov_var[2]) const override { _flow_innov_var.copyTo(flow_innov_var); }
-	void getFlowInnovRatio(float &flow_innov_ratio) const override { flow_innov_ratio = _optflow_test_ratio; }
-	const Vector2f &getFlowVelBody() const override { return _flow_vel_body; }
-	const Vector2f &getFlowVelNE() const override { return _flow_vel_ne; }
-	const Vector2f &getFlowCompensated() const override { return _flow_compensated_XY_rad; }
-	const Vector2f &getFlowUncompensated() const override { return _flow_sample_delayed.flow_xy_rad; }
-	const Vector3f &getFlowGyro() const override { return _flow_sample_delayed.gyro_xyz; }
+	void getFlowInnov(float flow_innov[2]) const { _flow_innov.copyTo(flow_innov); }
+	void getFlowInnovVar(float flow_innov_var[2]) const { _flow_innov_var.copyTo(flow_innov_var); }
+	void getFlowInnovRatio(float &flow_innov_ratio) const { flow_innov_ratio = _optflow_test_ratio; }
+	const Vector2f &getFlowVelBody() const { return _flow_vel_body; }
+	const Vector2f &getFlowVelNE() const { return _flow_vel_ne; }
+	const Vector2f &getFlowCompensated() const { return _flow_compensated_XY_rad; }
+	const Vector2f &getFlowUncompensated() const { return _flow_sample_delayed.flow_xy_rad; }
+	const Vector3f &getFlowGyro() const { return _flow_sample_delayed.gyro_xyz; }
 
-	void getHeadingInnov(float &heading_innov) const override { heading_innov = _heading_innov; }
-	void getHeadingInnovVar(float &heading_innov_var) const override { heading_innov_var = _heading_innov_var; }
+	void getHeadingInnov(float &heading_innov) const { heading_innov = _heading_innov; }
+	void getHeadingInnovVar(float &heading_innov_var) const { heading_innov_var = _heading_innov_var; }
 
-	void getHeadingInnovRatio(float &heading_innov_ratio) const override { heading_innov_ratio = _yaw_test_ratio; }
-	void getMagInnov(float mag_innov[3]) const override { _mag_innov.copyTo(mag_innov); }
-	void getMagInnovVar(float mag_innov_var[3]) const override { _mag_innov_var.copyTo(mag_innov_var); }
-	void getMagInnovRatio(float &mag_innov_ratio) const override { mag_innov_ratio = _mag_test_ratio.max(); }
+	void getHeadingInnovRatio(float &heading_innov_ratio) const { heading_innov_ratio = _yaw_test_ratio; }
+	void getMagInnov(float mag_innov[3]) const { _mag_innov.copyTo(mag_innov); }
+	void getMagInnovVar(float mag_innov_var[3]) const { _mag_innov_var.copyTo(mag_innov_var); }
+	void getMagInnovRatio(float &mag_innov_ratio) const { mag_innov_ratio = _mag_test_ratio.max(); }
 
-	void getDragInnov(float drag_innov[2]) const override { _drag_innov.copyTo(drag_innov); }
-	void getDragInnovVar(float drag_innov_var[2]) const override { _drag_innov_var.copyTo(drag_innov_var); }
-	void getDragInnovRatio(float drag_innov_ratio[2]) const override { _drag_test_ratio.copyTo(drag_innov_ratio); }
+	void getDragInnov(float drag_innov[2]) const { _drag_innov.copyTo(drag_innov); }
+	void getDragInnovVar(float drag_innov_var[2]) const { _drag_innov_var.copyTo(drag_innov_var); }
+	void getDragInnovRatio(float drag_innov_ratio[2]) const { _drag_test_ratio.copyTo(drag_innov_ratio); }
 
-	void getAirspeedInnov(float &airspeed_innov) const override { airspeed_innov = _airspeed_innov; }
-	void getAirspeedInnovVar(float &airspeed_innov_var) const override { airspeed_innov_var = _airspeed_innov_var; }
-	void getAirspeedInnovRatio(float &airspeed_innov_ratio) const override { airspeed_innov_ratio = _tas_test_ratio; }
+	void getAirspeedInnov(float &airspeed_innov) const { airspeed_innov = _airspeed_innov; }
+	void getAirspeedInnovVar(float &airspeed_innov_var) const { airspeed_innov_var = _airspeed_innov_var; }
+	void getAirspeedInnovRatio(float &airspeed_innov_ratio) const { airspeed_innov_ratio = _tas_test_ratio; }
 
-	void getBetaInnov(float &beta_innov) const override { beta_innov = _beta_innov; }
-	void getBetaInnovVar(float &beta_innov_var) const override { beta_innov_var = _beta_innov_var; }
-	void getBetaInnovRatio(float &beta_innov_ratio) const override { beta_innov_ratio = _beta_test_ratio; }
+	void getBetaInnov(float &beta_innov) const { beta_innov = _beta_innov; }
+	void getBetaInnovVar(float &beta_innov_var) const { beta_innov_var = _beta_innov_var; }
+	void getBetaInnovRatio(float &beta_innov_ratio) const { beta_innov_ratio = _beta_test_ratio; }
 
-	void getHaglInnov(float &hagl_innov) const override { hagl_innov = _hagl_innov; }
-	void getHaglInnovVar(float &hagl_innov_var) const override { hagl_innov_var = _hagl_innov_var; }
-	void getHaglInnovRatio(float &hagl_innov_ratio) const override { hagl_innov_ratio = _hagl_test_ratio; }
+	void getHaglInnov(float &hagl_innov) const { hagl_innov = _hagl_innov; }
+	void getHaglInnovVar(float &hagl_innov_var) const { hagl_innov_var = _hagl_innov_var; }
+	void getHaglInnovRatio(float &hagl_innov_ratio) const { hagl_innov_ratio = _hagl_test_ratio; }
 
 	// get the state vector at the delayed time horizon
-	matrix::Vector<float, 24> getStateAtFusionHorizonAsVector() const override;
+	matrix::Vector<float, 24> getStateAtFusionHorizonAsVector() const;
 
 	// get the wind velocity in m/s
-	Vector2f getWindVelocity() const override;
+	const Vector2f &getWindVelocity() const { return _state.wind_vel; }
 
 	// get the wind velocity var
-	Vector2f getWindVelocityVariance() const override;
+	Vector2f getWindVelocityVariance() const { return P.slice<2, 2>(22, 22).diag(); }
 
 	// get the true airspeed in m/s
 	void get_true_airspeed(float *tas) override;
@@ -175,13 +175,13 @@ public:
 	*/
 	bool reset_imu_bias() override;
 
-	Vector3f getVelocityVariance() const override;
+	Vector3f getVelocityVariance() const { return P.slice<3, 3>(4, 4).diag(); }
 
-	Vector3f getPositionVariance() const override;
+	Vector3f getPositionVariance() const { return P.slice<3, 3>(7, 7).diag(); }
 
 	// return an array containing the output predictor angular, velocity and position tracking
 	// error magnitudes (rad), (m/sec), (m)
-	Vector3f getOutputTrackingError() const override { return _output_tracking_error; }
+	const Vector3f &getOutputTrackingError() const { return _output_tracking_error; }
 
 	/*
 	Returns  following IMU vibration metrics in the following array locations
@@ -189,7 +189,7 @@ public:
 	1 : Gyro high frequency vibe = filtered length of (delta_angle - prev_delta_angle)
 	2 : Accel high frequency vibe = filtered length of (delta_velocity - prev_delta_velocity)
 	*/
-	Vector3f getImuVibrationMetrics() const override { return _vibe_metrics; }
+	const Vector3f &getImuVibrationMetrics() const { return _vibe_metrics; }
 
 	/*
 	First argument returns GPS drift  metrics in the following array locations
@@ -207,23 +207,23 @@ public:
 	// check if the EKF is dead reckoning horizontal velocity using inertial data only
 	void update_deadreckoning_status();
 
-	bool isTerrainEstimateValid() const override;
+	bool isTerrainEstimateValid() const;
 
-	uint8_t getTerrainEstimateSensorBitfield() const override {return _hagl_sensor_status.value;}
+	uint8_t getTerrainEstimateSensorBitfield() const {return _hagl_sensor_status.value;}
 
 	void updateTerrainValidity();
 
 	// get the estimated terrain vertical position relative to the NED origin
-	float getTerrainVertPos() const override;
+	float getTerrainVertPos() const { return _terrain_vpos; }
 
 	// get the terrain variance
 	float get_terrain_var() const { return _terrain_var; }
 
 	// get the accelerometer bias in m/s**2
-	Vector3f getAccelBias() const override { return _state.delta_vel_bias / _dt_ekf_avg; }
+	Vector3f getAccelBias() const { return _state.delta_vel_bias / _dt_ekf_avg; }
 
 	// get the gyroscope bias in rad/s
-	Vector3f getGyroBias() const override { return _state.delta_ang_bias / _dt_ekf_avg; }
+	Vector3f getGyroBias() const { return _state.delta_ang_bias / _dt_ekf_avg; }
 
 	// get GPS check status
 	void get_gps_check_status(uint16_t *val) override { *val = _gps_check_fail_status.value; }
@@ -260,13 +260,14 @@ public:
 	// Innovation Test Ratios - these are the ratio of the innovation to the acceptance threshold.
 	// A value > 1 indicates that the sensor measurement has exceeded the maximum acceptable level and has been rejected by the EKF
 	// Where a measurement type is a vector quantity, eg magnetometer, GPS position, etc, the maximum value is returned.
-	void get_innovation_test_status(uint16_t &status, float &mag, float &vel, float &pos, float &hgt, float &tas, float &hagl, float &beta) override;
+	void get_innovation_test_status(uint16_t &status, float &mag, float &vel, float &pos, float &hgt, float &tas,
+					float &hagl, float &beta) override;
 
 	// return a bitmask integer that describes which state estimates can be used for flight control
 	void get_ekf_soln_status(uint16_t *status) override;
 
 	// return the quaternion defining the rotation from the External Vision to the EKF reference frame
-	matrix::Quatf getVisionAlignmentQuaternion() const override;
+	matrix::Quatf getVisionAlignmentQuaternion() const { return Quatf(_R_ev_to_ekf); }
 
 	// use the latest IMU data at the current time horizon.
 	Quatf calculate_quaternion() const;
@@ -471,7 +472,7 @@ private:
 	gps_check_fail_status_u _gps_check_fail_status{};
 
 	// variables used to inhibit accel bias learning
-	bool _accel_bias_inhibit[3]{};		///< true when the accel bias learning is being inhibited for the specified axis
+	bool _accel_bias_inhibit[3] {};		///< true when the accel bias learning is being inhibited for the specified axis
 	Vector3f _accel_vec_filt;		///< acceleration vector after application of a low pass filter (m/sec**2)
 	float _accel_magnitude_filt{0.0f};	///< acceleration magnitude after application of a decaying envelope filter (rad/sec)
 	float _ang_rate_magnitude_filt{0.0f};		///< angular rate magnitude after application of a decaying envelope filter (rad/sec)
@@ -542,7 +543,8 @@ private:
 	// variance : observaton variance
 	// gate_sigma : innovation consistency check gate size (Sigma)
 	// jacobian : 4x1 vector of partial derivatives of observation wrt each quaternion state
-	void updateQuaternion(const float innovation, const float variance, const float gate_sigma, const Vector4f &yaw_jacobian);
+	void updateQuaternion(const float innovation, const float variance, const float gate_sigma,
+			      const Vector4f &yaw_jacobian);
 
 	// fuse the yaw angle obtained from a dual antenna GPS unit
 	void fuseGpsYaw();
@@ -752,25 +754,25 @@ private:
 	float getTerrainVPos() const;
 
 	void runOnGroundYawReset();
-	bool isYawResetAuthorized() const;
+	bool isYawResetAuthorized() const { return !_is_yaw_fusion_inhibited; }
 	bool canResetMagHeading() const;
 	void runInAirYawReset();
-	bool canRealignYawUsingGps() const;
+	bool canRealignYawUsingGps() const { return _control_status.flags.fixed_wing; }
 	void runVelPosReset();
 
 	void selectMagAuto();
 	void check3DMagFusionSuitability();
 	void checkYawAngleObservability();
 	void checkMagBiasObservability();
-	bool isYawAngleObservable() const;
-	bool isMagBiasObservable() const;
+	bool isYawAngleObservable() const { return _yaw_angle_observable; }
+	bool isMagBiasObservable() const { return _mag_bias_observable; }
 	bool canUse3DMagFusion() const;
 
 	void checkMagDeclRequired();
 	void checkMagInhibition();
 	bool shouldInhibitMag() const;
 	void checkMagFieldStrength();
-	bool isStrongMagneticDisturbance() const;
+	bool isStrongMagneticDisturbance() const { return _control_status.flags.mag_field_disturbed; }
 	bool isMeasuredMatchingGpsMagStrength() const;
 	bool isMeasuredMatchingAverageMagStrength() const;
 	static bool isMeasuredMatchingExpected(float measured, float expected, float gate);

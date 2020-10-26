@@ -50,11 +50,11 @@ void Ekf::controlMagFusion()
 	// yaw fusion is run selectively to enable yaw gyro bias learning when stationary on
 	// ground and to prevent uncontrolled yaw variance growth
 	if (_params.mag_fusion_type == MAG_FUSE_TYPE_NONE) {
-		if (noOtherYawAidingThanMag())
-		{
+		if (noOtherYawAidingThanMag()) {
 			_is_yaw_fusion_inhibited = true;
 			fuseHeading();
 		}
+
 		return;
 	}
 
@@ -91,6 +91,7 @@ void Ekf::controlMagFusion()
 			break;
 
 		case MAG_FUSE_TYPE_INDOOR:
+
 		/* fallthrough */
 		case MAG_FUSE_TYPE_HEADING:
 			startMagHdgFusion();
@@ -154,11 +155,6 @@ void Ekf::runOnGroundYawReset()
 	}
 }
 
-bool Ekf::isYawResetAuthorized() const
-{
-	return !_is_yaw_fusion_inhibited;
-}
-
 bool Ekf::canResetMagHeading() const
 {
 	return !isStrongMagneticDisturbance() && (_params.mag_fusion_type != MAG_FUSE_TYPE_NONE);
@@ -169,17 +165,16 @@ void Ekf::runInAirYawReset()
 	if (_mag_yaw_reset_req && isYawResetAuthorized()) {
 		bool has_realigned_yaw = false;
 
-		if (canRealignYawUsingGps()) { has_realigned_yaw = realignYawGPS(); }
-		else if (canResetMagHeading()) { has_realigned_yaw = resetMagHeading(_mag_lpf.getState()); }
+		if (canRealignYawUsingGps()) {
+			has_realigned_yaw = realignYawGPS();
+
+		} else if (canResetMagHeading()) {
+			has_realigned_yaw = resetMagHeading(_mag_lpf.getState());
+		}
 
 		_mag_yaw_reset_req = !has_realigned_yaw;
 		_control_status.flags.mag_aligned_in_flight = has_realigned_yaw;
 	}
-}
-
-bool Ekf::canRealignYawUsingGps() const
-{
-	return _control_status.flags.fixed_wing;
 }
 
 void Ekf::runVelPosReset()
@@ -237,16 +232,6 @@ void Ekf::checkMagBiasObservability()
 	_time_yaw_started = _imu_sample_delayed.time_us;
 }
 
-bool Ekf::isYawAngleObservable() const
-{
-	return _yaw_angle_observable;
-}
-
-bool Ekf::isMagBiasObservable() const
-{
-	return _mag_bias_observable;
-}
-
 bool Ekf::canUse3DMagFusion() const
 {
 	// Use of 3D fusion requires an in-air heading alignment but it should not
@@ -269,6 +254,7 @@ void Ekf::checkMagDeclRequired()
 void Ekf::checkMagInhibition()
 {
 	_is_yaw_fusion_inhibited = shouldInhibitMag();
+
 	if (!_is_yaw_fusion_inhibited) {
 		_mag_use_not_inhibit_us = _imu_sample_delayed.time_us;
 	}
@@ -299,18 +285,16 @@ bool Ekf::shouldInhibitMag() const
 void Ekf::checkMagFieldStrength()
 {
 	if (_params.check_mag_strength) {
-		_control_status.flags.mag_field_disturbed = _NED_origin_initialised
-							    ? !isMeasuredMatchingGpsMagStrength()
-							    : !isMeasuredMatchingAverageMagStrength();
+		if (_NED_origin_initialised) {
+			_control_status.flags.mag_field_disturbed = !isMeasuredMatchingGpsMagStrength();
+
+		} else {
+			_control_status.flags.mag_field_disturbed = !isMeasuredMatchingAverageMagStrength();
+		}
 
 	} else {
 		_control_status.flags.mag_field_disturbed = false;
 	}
-}
-
-bool Ekf::isStrongMagneticDisturbance() const
-{
-	return _control_status.flags.mag_field_disturbed;
 }
 
 bool Ekf::isMeasuredMatchingGpsMagStrength() const
@@ -330,14 +314,14 @@ bool Ekf::isMeasuredMatchingAverageMagStrength() const
 
 bool Ekf::isMeasuredMatchingExpected(const float measured, const float expected, const float gate)
 {
-	return (measured >= expected - gate)
-		&& (measured <= expected + gate);
+	return (measured >= expected - gate) && (measured <= expected + gate);
 }
 
 void Ekf::runMagAndMagDeclFusions()
 {
 	if (_control_status.flags.mag_3D) {
 		run3DMagAndDeclFusions();
+
 	} else if (_control_status.flags.mag_hdg) {
 		fuseHeading();
 	}
@@ -359,9 +343,9 @@ void Ekf::run3DMagAndDeclFusions()
 		// declination angle at a higher uncertainty to allow some learning of
 		// declination angle over time.
 		fuseMag();
+
 		if (_control_status.flags.mag_dec) {
 			fuseDeclination(0.5f);
 		}
 	}
 }
-

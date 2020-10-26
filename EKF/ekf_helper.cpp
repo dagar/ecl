@@ -1248,6 +1248,7 @@ Vector3f Ekf::getVisionVelocityVarianceInEkfFrame() const
 			}
 			break;
 	}
+
 	return ev_vel_cov.diag();
 }
 
@@ -1257,12 +1258,6 @@ void Ekf::calcExtVisRotMat()
 	// Calculate the quaternion delta that rotates from the EV to the EKF reference frame at the EKF fusion time horizon.
 	const Quatf q_error((_state.quat_nominal * _ev_sample_delayed.quat.inversed()).normalized());
 	_R_ev_to_ekf = Dcmf(q_error);
-}
-
-// return the quaternions for the rotation from External Vision system reference frame to the EKF reference frame
-matrix::Quatf Ekf::getVisionAlignmentQuaternion() const
-{
-	return Quatf(_R_ev_to_ekf);
 }
 
 // Increase the yaw error variance of the quaternions

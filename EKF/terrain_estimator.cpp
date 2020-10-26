@@ -309,9 +309,3 @@ void Ekf::updateTerrainValidity()
 	_hagl_sensor_status.flags.flow = shouldUseOpticalFlowForHagl()
 					 && recent_flow_for_terrain_fusion;
 }
-
-// get the estimated vertical position of the terrain relative to the NED origin
-float Ekf::getTerrainVertPos() const
-{
-	return _terrain_vpos;
-}
