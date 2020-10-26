@@ -40,13 +40,13 @@
  * @author Siddharth B Purohit <siddharthbharatpurohit@gmail.com>
  */
 
-#include "estimator_interface.h"
+#include "ekf.h"
 
 #include <ecl.h>
 #include <mathlib/mathlib.h>
 
 // Accumulate imu data and store to buffer at desired rate
-void EstimatorInterface::setIMUData(const imuSample &imu_sample)
+void Ekf::setIMUData(const imuSample &imu_sample)
 {
 	// TODO: resolve misplaced responsibility
 	if (!_initialised) {
@@ -168,7 +168,7 @@ void EstimatorInterface::setMagData(const magSample &mag_sample)
 	}
 }
 
-void EstimatorInterface::setGpsData(const gps_message &gps)
+void Ekf::setGpsData(const gps_message &gps)
 {
 	if (!_initialised || _gps_buffer_fail) {
 		return;
@@ -230,7 +230,7 @@ void EstimatorInterface::setGpsData(const gps_message &gps)
 	}
 }
 
-void EstimatorInterface::setBaroData(const baroSample &baro_sample)
+void Ekf::setBaroData(const baroSample &baro_sample)
 {
 	if (!_initialised || _baro_buffer_fail) {
 		return;
@@ -609,7 +609,7 @@ void EstimatorInterface::printBufferAllocationFailed(const char * buffer_name)
 void EstimatorInterface::print_status()
 {
 	ECL_INFO("local position valid: %s", local_position_is_valid() ? "yes" : "no");
-	ECL_INFO("global position valid: %s", global_position_is_valid() ? "yes" : "no");
+	//ECL_INFO("global position valid: %s", global_position_is_valid() ? "yes" : "no");
 
 	ECL_INFO("imu buffer: %d (%d Bytes)", _imu_buffer.get_length(), _imu_buffer.get_total_size());
 	ECL_INFO("gps buffer: %d (%d Bytes)", _gps_buffer.get_length(), _gps_buffer.get_total_size());

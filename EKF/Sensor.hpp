@@ -51,14 +51,14 @@ namespace sensor
 class Sensor
 {
 public:
-	virtual ~Sensor() {};
+	virtual ~Sensor() = default;
 
 	/*
 	 * run sanity checks on the current data
 	 * this has to be called immediately after
 	 * setting new data
 	 */
-	virtual void runChecks(){};
+	virtual void runChecks() {};
 
 	/*
 	 * return true if the sensor is healthy

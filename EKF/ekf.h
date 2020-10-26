@@ -56,108 +56,110 @@ public:
 	using SparseVector24f = matrix::SparseVectorf<24, Idxs...>;
 
 	Ekf() = default;
-	virtual ~Ekf() = default;
+	~Ekf() = default;
 
 	// initialise variables to sane values (also interface class)
-	bool init(uint64_t timestamp) override;
+	bool init(uint64_t timestamp);
+
+	void setIMUData(const imuSample &imu_sample);
 
 	// set the internal states and status to their default value
-	void reset() override;
+	void reset();
 
 	bool initialiseTilt();
 
 	// should be called every time new data is pushed into the filter
-	bool update() override;
+	bool update();
 
-	void getGpsVelPosInnov(float hvel[2], float &vvel, float hpos[2], float &vpos) const override;
+	void getGpsVelPosInnov(float hvel[2], float &vvel, float hpos[2], float &vpos) const;
 
-	void getGpsVelPosInnovVar(float hvel[2], float &vvel, float hpos[2], float &vpos) const override;
+	void getGpsVelPosInnovVar(float hvel[2], float &vvel, float hpos[2], float &vpos) const;
 
-	void getGpsVelPosInnovRatio(float &hvel, float &vvel, float &hpos, float &vpos) const override;
+	void getGpsVelPosInnovRatio(float &hvel, float &vvel, float &hpos, float &vpos) const;
 
-	void getEvVelPosInnov(float hvel[2], float &vvel, float hpos[2], float &vpos) const override;
+	void getEvVelPosInnov(float hvel[2], float &vvel, float hpos[2], float &vpos) const;
 
-	void getEvVelPosInnovVar(float hvel[2], float &vvel, float hpos[2], float &vpos) const override;
+	void getEvVelPosInnovVar(float hvel[2], float &vvel, float hpos[2], float &vpos) const;
 
-	void getEvVelPosInnovRatio(float &hvel, float &vvel, float &hpos, float &vpos) const override;
+	void getEvVelPosInnovRatio(float &hvel, float &vvel, float &hpos, float &vpos) const;
 
-	void getBaroHgtInnov(float &baro_hgt_innov) const override;
+	void getBaroHgtInnov(float &baro_hgt_innov) const;
 
-	void getBaroHgtInnovVar(float &baro_hgt_innov_var) const override;
+	void getBaroHgtInnovVar(float &baro_hgt_innov_var) const;
 
-	void getBaroHgtInnovRatio(float &baro_hgt_innov_ratio) const override;
+	void getBaroHgtInnovRatio(float &baro_hgt_innov_ratio) const;
 
-	void getRngHgtInnov(float &rng_hgt_innov) const override;
+	void getRngHgtInnov(float &rng_hgt_innov) const;
 
-	void getRngHgtInnovVar(float &rng_hgt_innov_var) const override;
+	void getRngHgtInnovVar(float &rng_hgt_innov_var) const;
 
-	void getRngHgtInnovRatio(float &rng_hgt_innov_ratio) const override;
+	void getRngHgtInnovRatio(float &rng_hgt_innov_ratio) const;
 
-	void getAuxVelInnov(float aux_vel_innov[2]) const override;
+	void getAuxVelInnov(float aux_vel_innov[2]) const;
 
-	void getAuxVelInnovVar(float aux_vel_innov[2]) const override;
+	void getAuxVelInnovVar(float aux_vel_innov[2]) const;
 
-	void getAuxVelInnovRatio(float &aux_vel_innov_ratio) const override;
+	void getAuxVelInnovRatio(float &aux_vel_innov_ratio) const;
 
-	void getFlowInnov(float flow_innov[2]) const override;
+	void getFlowInnov(float flow_innov[2]) const;
 
-	void getFlowInnovVar(float flow_innov_var[2]) const override;
+	void getFlowInnovVar(float flow_innov_var[2]) const;
 
-	void getFlowInnovRatio(float &flow_innov_ratio) const override;
+	void getFlowInnovRatio(float &flow_innov_ratio) const;
 
-	Vector2f getFlowVelBody() const override;
-	Vector2f getFlowVelNE() const override;
-	Vector2f getFlowCompensated() const override;
-	Vector2f getFlowUncompensated() const override;
-	Vector3f getFlowGyro() const override;
+	Vector2f getFlowVelBody() const;
+	Vector2f getFlowVelNE() const;
+	Vector2f getFlowCompensated() const;
+	Vector2f getFlowUncompensated() const;
+	Vector3f getFlowGyro() const;
 
-	void getHeadingInnov(float &heading_innov) const override;
+	void getHeadingInnov(float &heading_innov) const;
 
-	void getHeadingInnovVar(float &heading_innov_var) const override;
+	void getHeadingInnovVar(float &heading_innov_var) const;
 
-	void getHeadingInnovRatio(float &heading_innov_ratio) const override;
+	void getHeadingInnovRatio(float &heading_innov_ratio) const;
 
-	void getMagInnov(float mag_innov[3]) const override;
+	void getMagInnov(float mag_innov[3]) const;
 
-	void getMagInnovVar(float mag_innov_var[3]) const override;
+	void getMagInnovVar(float mag_innov_var[3]) const;
 
-	void getMagInnovRatio(float &mag_innov_ratio) const override;
+	void getMagInnovRatio(float &mag_innov_ratio) const;
 
-	void getDragInnov(float drag_innov[2]) const override;
+	void getDragInnov(float drag_innov[2]) const;
 
-	void getDragInnovVar(float drag_innov_var[2]) const override;
+	void getDragInnovVar(float drag_innov_var[2]) const;
 
-	void getDragInnovRatio(float drag_innov_ratio[2]) const override;
+	void getDragInnovRatio(float drag_innov_ratio[2]) const;
 
-	void getAirspeedInnov(float &airspeed_innov) const override;
+	void getAirspeedInnov(float &airspeed_innov) const;
 
-	void getAirspeedInnovVar(float &airspeed_innov_var) const override;
+	void getAirspeedInnovVar(float &airspeed_innov_var) const;
 
-	void getAirspeedInnovRatio(float &airspeed_innov_ratio) const override;
+	void getAirspeedInnovRatio(float &airspeed_innov_ratio) const;
 
-	void getBetaInnov(float &beta_innov) const override;
+	void getBetaInnov(float &beta_innov) const;
 
-	void getBetaInnovVar(float &beta_innov_var) const override;
+	void getBetaInnovVar(float &beta_innov_var) const;
 
-	void getBetaInnovRatio(float &beta_innov_ratio) const override;
+	void getBetaInnovRatio(float &beta_innov_ratio) const;
 
-	void getHaglInnov(float &hagl_innov) const override;
+	void getHaglInnov(float &hagl_innov) const;
 
-	void getHaglInnovVar(float &hagl_innov_var) const override;
+	void getHaglInnovVar(float &hagl_innov_var) const;
 
-	void getHaglInnovRatio(float &hagl_innov_ratio) const override;
+	void getHaglInnovRatio(float &hagl_innov_ratio) const;
 
 	// get the state vector at the delayed time horizon
-	matrix::Vector<float, 24> getStateAtFusionHorizonAsVector() const override;
+	matrix::Vector<float, 24> getStateAtFusionHorizonAsVector() const;
 
 	// get the wind velocity in m/s
-	Vector2f getWindVelocity() const override;
+	Vector2f getWindVelocity() const;
 
 	// get the wind velocity var
-	Vector2f getWindVelocityVariance() const override;
+	Vector2f getWindVelocityVariance() const;
 
 	// get the true airspeed in m/s
-	void get_true_airspeed(float *tas) override;
+	void get_true_airspeed(float *tas);
 
 	// get the full covariance matrix
 	const matrix::SquareMatrix<float, 24> &covariances() const { return P; }
@@ -175,38 +177,42 @@ public:
 	matrix::SquareMatrix<float, 3> position_covariances() const { return P.slice<3, 3>(7, 7); }
 
 	// ask estimator for sensor data collection decision and do any preprocessing if required, returns true if not defined
-	bool collect_gps(const gps_message &gps) override;
+	bool collect_gps(const gps_message &gps);
+
+	void setGpsData(const gps_message &gps);
+
+	void setBaroData(const baroSample &baro_sample);
 
 	// get the ekf WGS-84 origin position and height and the system time it was last set
 	// return true if the origin is valid
-	bool get_ekf_origin(uint64_t *origin_time, map_projection_reference_s *origin_pos, float *origin_alt) override;
+	bool get_ekf_origin(uint64_t *origin_time, map_projection_reference_s *origin_pos, float *origin_alt);
 
 	// get the 1-sigma horizontal and vertical position uncertainty of the ekf WGS-84 position
-	void get_ekf_gpos_accuracy(float *ekf_eph, float *ekf_epv) override;
+	void get_ekf_gpos_accuracy(float *ekf_eph, float *ekf_epv);
 
 	// get the 1-sigma horizontal and vertical position uncertainty of the ekf local position
-	void get_ekf_lpos_accuracy(float *ekf_eph, float *ekf_epv) override;
+	void get_ekf_lpos_accuracy(float *ekf_eph, float *ekf_epv);
 
 	// get the 1-sigma horizontal and vertical velocity uncertainty
-	void get_ekf_vel_accuracy(float *ekf_evh, float *ekf_evv) override;
+	void get_ekf_vel_accuracy(float *ekf_evh, float *ekf_evv);
 
 	// get the vehicle control limits required by the estimator to keep within sensor limitations
-	void get_ekf_ctrl_limits(float *vxy_max, float *vz_max, float *hagl_min, float *hagl_max) override;
+	void get_ekf_ctrl_limits(float *vxy_max, float *vz_max, float *hagl_min, float *hagl_max);
 
 	/*
 	Reset all IMU bias states and covariances to initial alignment values.
 	Use when the IMU sensor has changed.
 	Returns true if reset performed, false if rejected due to less than 10 seconds lapsed since last reset.
 	*/
-	bool reset_imu_bias() override;
+	bool reset_imu_bias();
 
-	Vector3f getVelocityVariance() const override;
+	Vector3f getVelocityVariance() const;
 
-	Vector3f getPositionVariance() const override;
+	Vector3f getPositionVariance() const;
 
 	// return an array containing the output predictor angular, velocity and position tracking
 	// error magnitudes (rad), (m/sec), (m)
-	Vector3f getOutputTrackingError() const override;
+	Vector3f getOutputTrackingError() const;
 
 	/*
 	Returns  following IMU vibration metrics in the following array locations
@@ -214,7 +220,7 @@ public:
 	1 : Gyro high frequency vibe = filtered length of (delta_angle - prev_delta_angle)
 	2 : Accel high frequency vibe = filtered length of (delta_velocity - prev_delta_velocity)
 	*/
-	Vector3f getImuVibrationMetrics() const override;
+	Vector3f getImuVibrationMetrics() const;
 
 	/*
 	First argument returns GPS drift  metrics in the following array locations
@@ -224,57 +230,66 @@ public:
 	Second argument returns true when IMU movement is blocking the drift calculation
 	Function returns true if the metrics have been updated and not returned previously by this function
 	*/
-	bool get_gps_drift_metrics(float drift[3], bool *blocked) override;
+	bool get_gps_drift_metrics(float drift[3], bool *blocked);
 
 	// return true if the global position estimate is valid
-	bool global_position_is_valid() override;
+	bool global_position_is_valid();
 
 	// check if the EKF is dead reckoning horizontal velocity using inertial data only
 	void update_deadreckoning_status();
 
-	bool isTerrainEstimateValid() const override;
+	bool isTerrainEstimateValid() const;
 
-	uint8_t getTerrainEstimateSensorBitfield() const override {return _hagl_sensor_status.value;}
+	//[[deprecated("Replaced by isTerrainEstimateValid")]]
+	bool get_terrain_valid() { return isTerrainEstimateValid(); }
+
+	uint8_t getTerrainEstimateSensorBitfield() const { return _hagl_sensor_status.value; }
 
 	void updateTerrainValidity();
 
 	// get the estimated terrain vertical position relative to the NED origin
-	float getTerrainVertPos() const override;
+	float getTerrainVertPos() const;
 
 	// get the terrain variance
 	float get_terrain_var() const { return _terrain_var; }
 
 	// get the accelerometer bias in m/s**2
-	Vector3f getAccelBias() const override;
+	Vector3f getAccelBias() const;
 
 	// get the gyroscope bias in rad/s
-	Vector3f getGyroBias() const override;
+	Vector3f getGyroBias() const;
 
 	// get GPS check status
-	void get_gps_check_status(uint16_t *val) override;
+	void get_gps_check_status(uint16_t *val);
 
 	// return the amount the local vertical position changed in the last reset and the number of reset events
-	void get_posD_reset(float *delta, uint8_t *counter) override {*delta = _state_reset_status.posD_change; *counter = _state_reset_status.posD_counter;}
+	void get_posD_reset(float *delta, uint8_t *counter) {
+		*delta = _state_reset_status.posD_change;
+		*counter = _state_reset_status.posD_counter;
+	}
 
 	// return the amount the local vertical velocity changed in the last reset and the number of reset events
-	void get_velD_reset(float *delta, uint8_t *counter) override {*delta = _state_reset_status.velD_change; *counter = _state_reset_status.velD_counter;}
+	void get_velD_reset(float *delta, uint8_t *counter) {
+		*delta = _state_reset_status.velD_change;
+		*counter = _state_reset_status.velD_counter;
+	}
 
 	// return the amount the local horizontal position changed in the last reset and the number of reset events
-	void get_posNE_reset(float delta[2], uint8_t *counter) override
+	void get_posNE_reset(float delta[2], uint8_t *counter)
 	{
 		_state_reset_status.posNE_change.copyTo(delta);
 		*counter = _state_reset_status.posNE_counter;
 	}
 
 	// return the amount the local horizontal velocity changed in the last reset and the number of reset events
-	void get_velNE_reset(float delta[2], uint8_t *counter) override
+	void get_velNE_reset(float delta[2], uint8_t *counter)
 	{
 		_state_reset_status.velNE_change.copyTo(delta);
 		*counter = _state_reset_status.velNE_counter;
 	}
 
 	// return the amount the quaternion has changed in the last reset and the number of reset events
-	void get_quat_reset(float delta_quat[4], uint8_t *counter) override
+	void get_quat_reset(float delta_quat[4], uint8_t *counter)
 	{
 		_state_reset_status.quat_change.copyTo(delta_quat);
 		*counter = _state_reset_status.quat_counter;
@@ -285,13 +300,13 @@ public:
 	// Innovation Test Ratios - these are the ratio of the innovation to the acceptance threshold.
 	// A value > 1 indicates that the sensor measurement has exceeded the maximum acceptable level and has been rejected by the EKF
 	// Where a measurement type is a vector quantity, eg magnetometer, GPS position, etc, the maximum value is returned.
-	void get_innovation_test_status(uint16_t &status, float &mag, float &vel, float &pos, float &hgt, float &tas, float &hagl, float &beta) override;
+	void get_innovation_test_status(uint16_t &status, float &mag, float &vel, float &pos, float &hgt, float &tas, float &hagl, float &beta);
 
 	// return a bitmask integer that describes which state estimates can be used for flight control
-	void get_ekf_soln_status(uint16_t *status) override;
+	void get_ekf_soln_status(uint16_t *status);
 
 	// return the quaternion defining the rotation from the External Vision to the EKF reference frame
-	matrix::Quatf getVisionAlignmentQuaternion() const override;
+	matrix::Quatf getVisionAlignmentQuaternion() const;
 
 	// use the latest IMU data at the current time horizon.
 	Quatf calculate_quaternion() const;
@@ -301,13 +316,13 @@ public:
 
 	// get solution data from the EKF-GSF emergency yaw estimator
 	// returns false when data is not available
-	bool getDataEKFGSF(float *yaw_composite, float *yaw_variance, float yaw[N_MODELS_EKFGSF], float innov_VN[N_MODELS_EKFGSF], float innov_VE[N_MODELS_EKFGSF], float weight[N_MODELS_EKFGSF]) override;
+	bool getDataEKFGSF(float *yaw_composite, float *yaw_variance, float yaw[N_MODELS_EKFGSF], float innov_VN[N_MODELS_EKFGSF], float innov_VE[N_MODELS_EKFGSF], float weight[N_MODELS_EKFGSF]);
 
 	// Request the EKF reset the yaw to the estimate from the internal EKF-GSF filter
 	// and reset the velocity and position states to the GPS. This will cause the EKF
 	// to ignore the magnetometer for the remainder of flight.
 	// This should only be used as a last resort before activating a loss of navigation failsafe
-	void requestEmergencyNavReset() override;
+	void requestEmergencyNavReset();
 
 private:
 	struct {
@@ -737,7 +752,7 @@ private:
 	// and a scalar innovation value
 	void fuse(const Vector24f& K, float innovation);
 
-	float compensateBaroForDynamicPressure(float baro_alt_uncompensated) override;
+	float compensateBaroForDynamicPressure(float baro_alt_uncompensated);
 
 	// calculate the earth rotation vector from a given latitude
 	Vector3f calcEarthRateNED(float lat_rad) const;
