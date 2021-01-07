@@ -129,7 +129,7 @@ class EkfInitializationTest : public ::testing::Test {
 
 			} else {
 				// Poorly observable, the variance is set to 0
-				EXPECT_FLOAT_EQ(dvel_bias_var(i), 0.f) << "axis" << i;
+				EXPECT_LE(dvel_bias_var(i), 4.01e-6f) << "axis" << i;
 				EXPECT_FLOAT_EQ(accel_bias(i), 0.f) << "axis" << i;
 			}
 		}
